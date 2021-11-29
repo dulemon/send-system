@@ -13,7 +13,7 @@
         </div>
         <div class="right"
              v-if="currenTab=== 0">
-          这里是基本信息页面
+          <BasicInfoManage />
         </div>
         <div class="right"
              v-else>
@@ -26,9 +26,12 @@
 <script>
 
 import PasswordManage from './PasswordManage'
+import BasicInfoManage from './BasicInfoManage'
+
 export default {
   components: {
-    PasswordManage
+    PasswordManage,
+    BasicInfoManage
   },
   data () {
     return {

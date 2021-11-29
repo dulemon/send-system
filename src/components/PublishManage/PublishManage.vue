@@ -2,32 +2,43 @@
   <div class="publish-manage">
     <div class="options">
       <el-button type="primary"
-                 @click="handleAddVisable(true)">发布信息</el-button>
+                 @click="handleAddVisable(true)">新增发布</el-button>
 
     </div>
-    <div class="wrap">
+    <div class="wrap"
+         v-loading="tableLoading">
       <div class="table">
         <el-table :data="publishList"
                   style="width: 100%"
                   :row-class-name="tableRowClassName">
-          <el-table-column prop="date"
-                           label="日期"
+          <el-table-column prop="title"
+                           label="标题"
                            width="180">
           </el-table-column>
-          <el-table-column prop="name"
-                           label="姓名"
+          <el-table-column prop="description"
+                           label="描述"
                            width="180">
           </el-table-column>
-          <el-table-column prop="address"
-                           label="地址">
+          <el-table-column prop="reward"
+                           label="赏金">
           </el-table-column>
         </el-table>
 
       </div>
+      <div style="text-align: right; padding: 10px 0 10px 10px">
+        <el-pagination style="padding: 0"
+                       background
+                       layout="prev, pager, next"
+                       :current-page="pageNum"
+                       :total="total"
+                       :page-size="pageSize"
+                       @current-change="handleCurrentChange">
+        </el-pagination>
+      </div>
 
     </div>
 
-    <el-dialog title="发布信息"
+    <el-dialog title="新增发布"
                :visible.sync="addVisable">
       <el-form ref="addData"
                :model="addData"
@@ -121,6 +132,8 @@ export default {
       publishList: [],
       pageNum: 1,
       pageSize: 10,
+      total: 0,
+      tableLoading: false,
     }
   },
 
@@ -135,11 +148,21 @@ export default {
     },
     //获取发布信息列表
     getPublishList () {
+      this.tableLoading = true
       publishListAPI({ pageNum: this.pageNum, pageSize: this.pageSize }).then(res => {
-        console.log(res)
+        if (res.description === 'success') {
+          this.publishList = res.data.list
+          this.total = res.data.total
+          this.tableLoading = false
+        }
       })
-
     },
+    //分页
+    handleCurrentChange (page) {
+      this.pageNum = page
+      this.getPublishList()
+    },
+    // 新增发布
     handleAdd () {
       this.$refs.addData.validate((valid) => {
         if (valid) {
@@ -198,9 +221,14 @@ export default {
       this.dialogImageUrl = file.url;
       this.dialogVisible = true;
     },
-
-
-
+    tableRowClassName ({ rowIndex }) {
+      if (rowIndex === 1) {
+        return 'warning-row'
+      } else if (rowIndex === 3) {
+        return 'success-row'
+      }
+      return ''
+    }
   }
 }
 </script>
@@ -210,6 +238,9 @@ export default {
 .publish-manage {
   width: 100%;
   height: 100%;
+}
+.options {
+  margin-bottom: 20px;
 }
 .martop {
   margin-top: 20px;
@@ -231,5 +262,11 @@ export default {
 .el-textarea,
 .el-input {
   width: 400px;
+}
+.el-table .warning-row {
+  background: oldlace;
+}
+.el-table .success-row {
+  background: #f0f9eb;
 }
 </style>

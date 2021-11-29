@@ -1,7 +1,7 @@
 <template>
   <div class="home">
     <div class="top">
-      <div class="left"> Ant Design Pro</div>
+      <div class="left">这是一个测试系统</div>
       <div class="right">
         <div class=right-item>
           <el-avatar size="small"
@@ -9,30 +9,37 @@
 
         </div>
         <div class="right-item">
-          <router-link to="/home/personal/settings"> <span>欢迎您, {{ userInfo.nickName }}</span></router-link>
+          <el-tooltip class="item"
+                      content="个人设置"
+                      placement="bottom">
+            <router-link to="/home/personal/settings"> <span>欢迎您, {{userInfo ? userInfo.nickName : "admin"}}</span></router-link>
+          </el-tooltip>
         </div>
         <div class="right-item">
-          <router-link to="/login"> <i class="el-icon-switch-button"></i></router-link>
+          <el-tooltip class="item"
+                      effect="dark"
+                      content="退出登录"
+                      placement="bottom">
+            <router-link to="/login"> <i class="el-icon-switch-button"></i></router-link>
+          </el-tooltip>
+
         </div>
       </div>
     </div>
     <div class="wrap">
       <div class="left">
-        <el-menu default-active="1"
+        <el-menu :default-active="currentActive"
                  class="el-menu-vertical-demo"
                  @open="handleOpen"
                  @close="handleClose">
-          <el-menu-item index="1">
+
+          <el-menu-item :index="item.key"
+                        v-for="item in menuList"
+                        :key="item.key">
             <i class="el-icon-menu"></i>
-            <span slot="title">导航二</span>
-          </el-menu-item>
-          <el-menu-item index="2">
-            <i class="el-icon-menu"></i>
-            <span slot="title">投诉管理</span>
-          </el-menu-item>
-          <el-menu-item index="3">
-            <i class="el-icon-menu"></i>
-            <span slot="title">订单管理</span>
+            <router-link :to="item.url">
+              <span>{{item.title}}</span>
+            </router-link>
           </el-menu-item>
         </el-menu>
       </div>
@@ -50,15 +57,33 @@
 export default {
   data () {
     return {
-      menuList: [],
-      userInfo: JSON.parse(sessionStorage.getItem('userInfo'))
+      menuList: [
+        {
+          title: '发布管理',
+          url: '/home/publish/manage',
+          key: '1',
+
+        },
+        {
+          title: '投诉管理',
+          url: '/home/publish/manage',
+          key: '2',
+
+        },
+        {
+          title: '订单管理',
+          url: '/home/publish/manage',
+          key: '3',
+
+        }
+      ],
+      userInfo: JSON.parse(sessionStorage.getItem('userInfo')),
+      currentActive: '1',
 
     }
   },
   methods: {
-    // goSettings () {
 
-    // }
   }
 
 
@@ -81,6 +106,7 @@ export default {
   height: 100%;
   background: #fff;
   box-shadow: 2px 0 6px rgb(0 21 41 / 35%);
+  padding-top: 15px;
 }
 .wrap .right {
   width: calc(100% - 220px);
@@ -117,6 +143,24 @@ export default {
 .right-item span,
 .right-item i {
   color: #fff;
+  font-size: 14px;
+}
+.is-active a.router-link-exact-active,
+.is-active a.router-link-active {
+  color: #409eff !important;
+}
+a {
+  text-decoration: none;
+  color: #000;
+}
+.router-link-active {
+  text-decoration: none;
+  color: #000;
+}
+.el-menu-item {
+  line-height: unset !important;
+  display: flex;
+  align-items: center;
 }
 
 >>> .el-menu {

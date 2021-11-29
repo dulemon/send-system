@@ -5,7 +5,7 @@
              :rules="rules"
              ref="updatePasswordData"
              :model="updatePasswordData">
-      <el-form-item label="旧密码"
+      <el-form-item label="原密码"
                     prop="oldPassword">
         <el-input v-model="updatePasswordData.oldPassword"
                   show-password></el-input>
@@ -66,7 +66,7 @@ export default {
       },
       rules: {
         oldPassword: [
-          { required: true, message: '请输入旧密码', trigger: 'blur' },
+          { required: true, message: '请输入原密码', trigger: 'blur' },
         ],
         newPassword: [
           { required: true, message: '请输入新密码', trigger: 'blur' },
