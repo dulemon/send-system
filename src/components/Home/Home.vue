@@ -103,14 +103,16 @@ export default {
 }
 .wrap .left {
   width: 220px;
-  height: 100%;
+  height: calc(100% - 15px);
+  overflow-y: auto;
   background: #fff;
   box-shadow: 2px 0 6px rgb(0 21 41 / 35%);
   padding-top: 15px;
 }
 .wrap .right {
   width: calc(100% - 220px);
-  height: 100%;
+  height: calc(100% - 40px);
+  overflow-y: auto;
   background: #f0f2f5;
   padding: 20px;
 }

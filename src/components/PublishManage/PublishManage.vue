@@ -167,11 +167,13 @@ export default {
       this.$refs.addData.validate((valid) => {
         if (valid) {
           this.addLoading = true
+          console.log(this.addData.imageUrl)
           publishCreateAPI({ ...this.addData, imageUrl: JSON.stringify(this.addData.imageUrl) }).then((res) => {
             if (res.description === 'success') {
               Message.success({ message: '操作成功！' })
               this.handleAddVisable(false)
               this.addLoading = false
+              this.getPublishList()
             } else {
               Message.success({ message: `${res.description}！` })
               this.addLoading = false
@@ -182,29 +184,64 @@ export default {
     },
     // 获取图片信息
     getImageFile (file, fileList) {
-      this.getImageBase64(file.raw).then((res) => {
-        console.log("res", res);
-        this.addData.imageUrl.push(res);
+      this.getImageBase64(file.raw).then(async (res) => {
+        const imgSrc = await this.compressImg(res, 1000, 1000)
+        this.addData.imageUrl.push(imgSrc);
       });
       // 大于1张隐藏
       this.hideUploadEdit = fileList.length >= 1;
     },
+    compressImg (img, mx, mh) {
+      return new Promise((resolve, reject) => {
+        const canvas = document.createElement('canvas')
+        const context = canvas.getContext('2d')
+        const { width: originWidth, height: originHeight } = img
+        let dataURL = ''
+        // 最大尺寸限制
+        const maxWidth = mx
+        const maxHeight = mh
+        // 目标尺寸
+        let targetWidth = originWidth
+        let targetHeight = originHeight
+        if (originWidth > maxWidth || originHeight > maxHeight) {
+          if (originWidth / originHeight > 1) {
+            // 宽图片
+            targetWidth = maxWidth
+            targetHeight = Math.round(maxWidth * (originHeight / originWidth))
+          } else {
+            // 高图片
+            targetHeight = maxHeight
+            targetWidth = Math.round(maxHeight * (originWidth / originHeight))
+          }
+        }
+        canvas.width = targetWidth
+        canvas.height = targetHeight
+        context.clearRect(0, 0, targetWidth, targetHeight)
+        // 图片绘制
+        context.drawImage(img, 0, 0, targetWidth, targetHeight)
+        dataURL = canvas.toDataURL('image/jpeg') // 转换图片为dataURL
+        resolve(dataURL)
+      })
+    },
     //转换成base64方法
     getImageBase64 (file) {
-      return new Promise(function (resolve, reject) {
-        let newImagereader = new FileReader();
-        let imgInfo = "";
-        newImagereader.readAsDataURL(file);
-        newImagereader.onload = function () {
-          imgInfo = newImagereader.result;
-        };
-        newImagereader.onerror = function (error) {
-          reject(error);
-        };
-        newImagereader.onloadend = function () {
-          resolve(imgInfo);
-        };
-      });
+      return new Promise((resolve, reject) => {
+        const img = new Image()
+        const reader = new FileReader()
+        reader.onload = function (e) {
+          img.src = e.target.result
+        }
+        reader.onerror = function (e) {
+          reject(e)
+        }
+        reader.readAsDataURL(file)
+        img.onload = function () {
+          resolve(img)
+        }
+        img.onerror = function (e) {
+          reject(e)
+        }
+      })
     },
     //删除
     handlePicRemove (file, fileList) {
