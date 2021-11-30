@@ -30,7 +30,7 @@ export const updateUserInfoAPI = data => {
   return put("/user/updateInfo", data);
 };
 
-// 发布信息
+// 新建发布
 export const publishCreateAPI = data => {
   return post("/publish/create", data);
 };
@@ -38,4 +38,9 @@ export const publishCreateAPI = data => {
 // 发布信息列表
 export const publishListAPI = data => {
   return get("/publish/list", data);
+};
+
+// 发布详情
+export const publishDetailAPI = data => {
+  return get("/publish/detail", data);
 };

@@ -5,7 +5,7 @@
       <div class="right">
         <div class=right-item>
           <el-avatar size="small"
-                     src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"></el-avatar>
+                     :src="userInfo.profilePhoto"></el-avatar>
 
         </div>
         <div class="right-item">
@@ -36,7 +36,7 @@
           <el-menu-item :index="item.key"
                         v-for="item in menuList"
                         :key="item.key">
-            <i class="el-icon-menu"></i>
+            <i :class="item.icon"></i>
             <router-link :to="item.url">
               <span>{{item.title}}</span>
             </router-link>
@@ -54,6 +54,9 @@
   </div>
 </template>
 <script>
+
+import { getUserInfoAPI } from '@/services/services'
+
 export default {
   data () {
     return {
@@ -62,27 +65,41 @@ export default {
           title: '发布管理',
           url: '/home/publish/manage',
           key: '1',
+          icon: 'el-icon-menu'
 
         },
         {
           title: '投诉管理',
           url: '/home/publish/manage',
           key: '2',
+          icon: 'el-icon-document'
 
         },
         {
           title: '订单管理',
           url: '/home/publish/manage',
           key: '3',
+          icon: 'el-icon-setting'
 
         }
       ],
-      userInfo: JSON.parse(sessionStorage.getItem('userInfo')),
+      userInfo: {},
       currentActive: '1',
 
     }
   },
+  mounted () {
+    this.getUser()
+  },
+
   methods: {
+    getUser () {
+      getUserInfoAPI().then(res => {
+        if (res.description === 'success') {
+          this.userInfo = res.data
+        }
+      })
+    },
 
   }
 

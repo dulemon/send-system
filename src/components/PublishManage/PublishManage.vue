@@ -11,16 +11,50 @@
         <el-table :data="publishList"
                   style="width: 100%"
                   :row-class-name="tableRowClassName">
+          <el-table-column prop="index"
+                           label="序号"
+                           type="index">
+          </el-table-column>
+
           <el-table-column prop="title"
-                           label="标题"
-                           width="180">
+                           label="标题">
           </el-table-column>
           <el-table-column prop="description"
-                           label="描述"
+                           label="描述">
+          </el-table-column>
+          <el-table-column prop="imageUrl"
+                           label="图片"
                            width="180">
+            <template slot-scope="scope">
+              <el-image style="width: 100px; height: 100px"
+                        :src="scope.row.imageUrl[0]"
+                        fit="cover"></el-image>
+            </template>
+
           </el-table-column>
           <el-table-column prop="reward"
                            label="赏金">
+            <template slot-scope="scope">
+              <span>{{ scope.row.reward}}元</span>
+
+            </template>
+          </el-table-column>
+          <el-table-column prop="auditStatus"
+                           label="状态">
+            <template slot-scope="scope">
+              <span>{{ scope.row.auditStatus === 1 ? '待审核' : (scope.row.auditStatus === 2 ?  '审核通过' : '审核不通过') }}</span>
+
+            </template>
+          </el-table-column>
+          <el-table-column fixed="right"
+                           label="操作">
+            <template slot-scope="scope">
+              <el-button @click="getPublishDetail(scope.row.id)"
+                         type="text"
+                         size="small">查看</el-button>
+              <el-button type="text"
+                         size="small">编辑</el-button>
+            </template>
           </el-table-column>
         </el-table>
 
@@ -92,12 +126,46 @@
                    :loading="addLoading">确 定</el-button>
       </span>
     </el-dialog>
+
+    <el-dialog title="详情"
+               :visible.sync="detailVisable"
+               width="60%">
+      <div class="detail-content"
+           v-loading="detailLoading">
+        <div class="first">
+          <div class="avatar">
+            <el-avatar :size="60"
+                       :src="detailData.profilePhoto"></el-avatar>
+          </div>
+          <div class="user">
+            <div class="credit"> <span>{{ detailData.nickName}}</span><span>信誉度{{detailData.creditLevel }}</span></div>
+            <div class="create"><span>{{ detailData.createTime}}</span></div>
+          </div>
+        </div>
+        <div class="second">
+          ￥{{detailData.reward}}元
+        </div>
+        <div class="thrid">{{ detailData.title }}</div>
+        <div class="forth">
+          {{detailData.description}}
+
+        </div>
+        <div class="fifth">
+          <el-image v-for="item in detailData.imageUrl"
+                    :key="item"
+                    :src="item"></el-image>
+
+        </div>
+      </div>
+
+    </el-dialog>
   </div>
 </template>
 <script>
 
-import { publishListAPI, publishCreateAPI } from '@/services/services'
+import { publishListAPI, publishCreateAPI, publishDetailAPI } from '@/services/services'
 import { Message } from 'element-ui'
+import moment from 'moment'
 
 export default {
 
@@ -128,15 +196,19 @@ export default {
       },
       publishList: [],
       pageNum: 1,
-      pageSize: 10,
+      pageSize: 5,
       total: 0,
       tableLoading: false,
+      detailData: {
+
+      },
+      detailVisable: false,
+      detailLoading: false
     }
   },
 
   mounted () {
     this.getPublishList()
-
   },
 
   methods: {
@@ -151,6 +223,26 @@ export default {
           this.publishList = res.data.list
           this.total = res.data.total
           this.tableLoading = false
+        }
+      })
+    },
+
+    //获取发布详情
+    getPublishDetail (id) {
+      this.detailVisable = true
+      this.detailLoading = true
+      publishDetailAPI({ publishInfoId: id }).then((res) => {
+        this.detailLoading = false
+        if (res.description === 'success') {
+          const level = {
+            1: '较差',
+            2: '中等',
+            3: '良好',
+            4: '优秀',
+            5: '极好'
+          }
+          this.detailData = { ...res.data, createTime: moment(res.data.createTime).format('YYYY-MM-DD hh:mm:ss'), creditLevel: level[res.data.creditLevel] }
+
         }
       })
     },
@@ -272,6 +364,10 @@ export default {
 .options {
   margin-bottom: 20px;
 }
+.wrap {
+  background: #fff;
+  padding: 20px;
+}
 .martop {
   margin-top: 20px;
 }
@@ -298,5 +394,53 @@ export default {
 }
 .el-table .success-row {
   background: #f0f9eb;
+}
+.detail-content {
+  width: 100%;
+  height: 100%;
+}
+>>> .el-dialog__body {
+  padding: 5px 20px 20px 20px !important;
+  max-height: 500px;
+  overflow-y: auto;
+}
+.detail-content .first {
+  display: flex;
+  align-items: center;
+}
+.detail-content .first .user {
+  margin-left: 15px;
+}
+.detail-content .first .user .credit {
+  padding-bottom: 7px;
+}
+.detail-content .first .user .credit span:nth-child(1) {
+  color: #000;
+  font-weight: bolder;
+  padding-right: 5px;
+  border-right: 1px solid #606266;
+}
+.detail-content .first .user .credit span:nth-child(2) {
+  color: #409eff;
+  padding-left: 5px;
+  font-size: 13px;
+}
+.detail-content .first .user .create {
+  font-size: 12px;
+}
+.detail-content .second {
+  padding: 20px 0;
+  color: red;
+  font-size: 20px;
+  font-weight: bold;
+}
+.detail-content .thrid {
+  font-size: 16px;
+  color: #000;
+  line-height: 40px;
+}
+.detail-content .forth {
+  font-size: 13px;
+  padding-bottom: 15px;
 }
 </style>
