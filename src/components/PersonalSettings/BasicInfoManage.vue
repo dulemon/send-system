@@ -49,6 +49,10 @@
                       prop="createTime">
           <span>{{ basicInfoData.createTime}}</span>
         </el-form-item>
+        <el-form-item label="信誉等级"
+                      prop="creditLevel">
+          <span>{{ basicInfoData.creditLevel}}</span>
+        </el-form-item>
         <el-form-item>
           <el-button type="primary"
                      :loading="editLoading"
@@ -58,7 +62,7 @@
     </div>
     <div class="right">
       <el-avatar :size="100"
-                 :src="basicInfoData.imgUrl"></el-avatar>
+                 :src="basicInfoData.profilePhoto"></el-avatar>
       <el-upload action=""
                  :on-change="getImageFile"
                  :before-upload="beforeAvatarUpload"
@@ -75,33 +79,54 @@
 
 import { Message } from 'element-ui'
 import moment from 'moment'
-import { updateUserInfoAPI } from '@/services/services'
+import { updateUserInfoAPI, getUserInfoAPI } from '@/services/services'
 
 
 export default {
 
   data () {
-    let userInfo = JSON.parse(sessionStorage.getItem('userInfo'))
     return {
       basicInfoData: {
-        nickName: userInfo.nickName,
-        realName: userInfo.realName,
-        gender: userInfo.gender,
-        birthDate: userInfo.birthDate,
-        currentAddress: userInfo.currentAddress,
-        emailAddress: userInfo.emailAddress,
-        createTime: moment(userInfo.createTime).format('YYYY-MM-DD hh:mm:ss'),
-        imgUrl: userInfo.imgUrl,
-        nation: userInfo.nation
       },
       editLoading: false
 
     }
   },
+  mounted () {
+    this.getUser()
+  },
 
   methods: {
+    // 获取用户个人信息
+    getUser () {
+      getUserInfoAPI().then(res => {
+        if (res.description === 'success') {
+          let userInfo = res.data
+          const level = {
+            1: '较差',
+            2: '中等',
+            3: '良好',
+            4: '优秀',
+            5: '极好'
+          }
+          this.basicInfoData = {
+            nickName: userInfo.nickName,
+            realName: userInfo.realName,
+            gender: userInfo.gender,
+            birthDate: userInfo.birthDate,
+            currentAddress: userInfo.currentAddress,
+            emailAddress: userInfo.emailAddress,
+            createTime: moment(userInfo.createTime).format('YYYY-MM-DD hh:mm:ss'),
+            profilePhoto: userInfo.profilePhoto,
+            nation: userInfo.nation,
+            creditLevel: level[userInfo.creditLevel]
 
-    //保存
+
+          }
+        }
+      })
+    },
+    // 保存
     onSubmit () {
       this.$refs.basicInfoData.validate((valid) => {
         if (valid) {
@@ -112,9 +137,9 @@ export default {
             this.editLoading = false
             if (res.description === 'success') {
               Message.success({ message: '修改成功!' })
-              sessionStorage.setItem('userInfo', update(this.basicInfoData));
+              this.getUser()
             } else {
-              Message.success({ message: `修改失败！` })
+              Message.error({ message: `修改失败！` })
               return false;
             }
           })
@@ -123,43 +148,75 @@ export default {
     },
     // 获取图片信息
     getImageFile (file, fileList) {
-      this.getImageBase64(file.raw).then((res) => {
-
-        this.basicInfoData.imgUrl = res;
-        console.log(this.basicInfoData)
+      this.getImageBase64(file.raw).then(async (res) => {
+        const imgSrc = await this.compressImg(res, 1000, 1000)
+        this.basicInfoData.profilePhoto = imgSrc;
       });
+    },
+    compressImg (img, mx, mh) {
+      return new Promise((resolve, reject) => {
+        const canvas = document.createElement('canvas')
+        const context = canvas.getContext('2d')
+        const { width: originWidth, height: originHeight } = img
+        let dataURL = ''
+        // 最大尺寸限制
+        const maxWidth = mx
+        const maxHeight = mh
+        // 目标尺寸
+        let targetWidth = originWidth
+        let targetHeight = originHeight
+        if (originWidth > maxWidth || originHeight > maxHeight) {
+          if (originWidth / originHeight > 1) {
+            // 宽图片
+            targetWidth = maxWidth
+            targetHeight = Math.round(maxWidth * (originHeight / originWidth))
+          } else {
+            // 高图片
+            targetHeight = maxHeight
+            targetWidth = Math.round(maxHeight * (originWidth / originHeight))
+          }
+        }
+        canvas.width = targetWidth
+        canvas.height = targetHeight
+        context.clearRect(0, 0, targetWidth, targetHeight)
+        // 图片绘制
+        context.drawImage(img, 0, 0, targetWidth, targetHeight)
+        dataURL = canvas.toDataURL('image/jpeg') // 转换图片为dataURL
+        resolve(dataURL)
+      })
     },
     //转换成base64方法
     getImageBase64 (file) {
-      return new Promise(function (resolve, reject) {
-        let newImagereader = new FileReader();
-        let imgInfo = "";
-        newImagereader.readAsDataURL(file);
-        newImagereader.onload = function () {
-          imgInfo = newImagereader.result;
-        };
-        newImagereader.onerror = function (error) {
-          reject(error);
-        };
-        newImagereader.onloadend = function () {
-          resolve(imgInfo);
-        };
-      });
+      return new Promise((resolve, reject) => {
+        const img = new Image()
+        const reader = new FileReader()
+        reader.onload = function (e) {
+          img.src = e.target.result
+        }
+        reader.onerror = function (e) {
+          reject(e)
+        }
+        reader.readAsDataURL(file)
+        img.onload = function () {
+          resolve(img)
+        }
+        img.onerror = function (e) {
+          reject(e)
+        }
+      })
     },
     beforeAvatarUpload (file) {
       const filetype = ['image/jpeg', 'image/png', 'image/jpg']
       const isJPG = filetype.includes(file.type);
-      const isLt2M = file.size / 1024 / 1024 < 2;
-
+      const isLt2M = file.size / 1024 / 1024 <= 1;
       if (!isJPG) {
         this.$message.error('上传头像图片只能是 JPG 格式!');
       }
       if (!isLt2M) {
-        this.$message.error('上传头像图片大小不能超过 2MB!');
+        this.$message.error('上传头像图片大小不能超过 1MB!');
       }
       return isJPG && isLt2M;
     }
-
   }
 }
 </script>
@@ -168,11 +225,8 @@ export default {
 <style scoped >
 .basicinfo-manage {
   width: 100%;
-  height: calc(100% - 40px);
-  overflow: auto;
   display: flex;
   justify-content: space-between;
-  padding: 20px 0;
 }
 .left {
   width: 70%;

@@ -20,6 +20,11 @@ export const updatePasswordAPI = data => {
   return put("/user/updateMyPsw", data);
 };
 
+// 获取用户信息
+export const getUserInfoAPI = () => {
+  return get("/user/query");
+};
+
 // 更新用户信息
 export const updateUserInfoAPI = data => {
   return put("/user/updateInfo", data);

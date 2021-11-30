@@ -91,11 +91,8 @@
                    @click="handleAdd"
                    :loading="addLoading">确 定</el-button>
       </span>
-
     </el-dialog>
-
   </div>
-
 </template>
 <script>
 
@@ -175,7 +172,7 @@ export default {
               this.handleAddVisable(false)
               this.getPublishList()
             } else {
-              Message.success({ message: `${res.description}！` })
+              Message.error({ message: `${res.description}！` })
             }
           })
         }
@@ -248,12 +245,9 @@ export default {
       this.getImageBase64(file.raw).then((res) => {
         this.addData.imageUrl.filter((item) => item !== res);
       });
-      console.log(file, fileList)
-      // this.imageUrl = "";
     },
     //预览
     handlePicPreview (file) {
-      console.log("file", file);
       this.dialogImageUrl = file.url;
       this.dialogVisible = true;
     },

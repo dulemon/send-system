@@ -90,7 +90,7 @@ export default {
               Message.success({ message: '修改成功，请重新登录!' })
               this.$router.push('/login')
             } else {
-              Message.success({ message: `修改失败！` })
+              Message.error({ message: `修改失败！` })
               return false;
             }
 

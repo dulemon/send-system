@@ -69,7 +69,7 @@ export default {
               this.$router.push('/home')
               sessionStorage.setItem('userInfo', JSON.stringify(res.data[0]))
             } else {
-              Message.success({ message: `${res.description}！` })
+              Message.error({ message: `${res.description}！` })
             }
           })
         }

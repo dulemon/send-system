@@ -60,7 +60,7 @@ export default {
 }
 .wrap {
   width: 800px;
-  min-height: 500px;
+  height: 100%;
   background: #fff;
   border: 1px solid #e8e8e8;
 }
@@ -100,6 +100,7 @@ export default {
 }
 .content .right {
   padding: 10px 30px;
-  width: calc(100% - 150px);
+  width: calc(100% - 60px);
+  overflow-y: auto;
 }
 </style>

@@ -160,7 +160,7 @@ export default {
               Message.success({ message: '注册成功！' })
               this.$router.push('/login')
             } else {
-              Message.success({ message: `注册失败,${res.description}！` })
+              Message.error({ message: `注册失败,${res.description}！` })
             }
           })
 
