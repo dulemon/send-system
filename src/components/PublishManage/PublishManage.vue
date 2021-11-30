@@ -169,14 +169,13 @@ export default {
           this.addLoading = true
           console.log(this.addData.imageUrl)
           publishCreateAPI({ ...this.addData, imageUrl: JSON.stringify(this.addData.imageUrl) }).then((res) => {
+            this.addLoading = false
             if (res.description === 'success') {
               Message.success({ message: '操作成功！' })
               this.handleAddVisable(false)
-              this.addLoading = false
               this.getPublishList()
             } else {
               Message.success({ message: `${res.description}！` })
-              this.addLoading = false
             }
           })
         }

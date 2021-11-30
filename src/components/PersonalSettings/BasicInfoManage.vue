@@ -3,6 +3,7 @@
     <div class="left">
       <el-form label-width="100px"
                :model="basicInfoData"
+               ref="basicInfoData"
                class="demo-form-inline"
                label-position="left">
         <el-form-item label="昵称"
@@ -15,11 +16,16 @@
           <el-input v-model="basicInfoData.realName"
                     placeholder="请输入真实姓名"></el-input>
         </el-form-item>
+        <el-form-item label="民族"
+                      prop="nation">
+          <el-input v-model="basicInfoData.nation"
+                    placeholder="请输入民族"></el-input>
+        </el-form-item>
         <el-form-item label="性别"
                       prop="gender">
           <el-radio-group v-model="basicInfoData.gender">
-            <el-radio label="1">男</el-radio>
-            <el-radio label="2">女</el-radio>
+            <el-radio :label="1">男</el-radio>
+            <el-radio :label="2">女</el-radio>
           </el-radio-group>
         </el-form-item>
         <el-form-item label="出生日期"
@@ -45,6 +51,7 @@
         </el-form-item>
         <el-form-item>
           <el-button type="primary"
+                     :loading="editLoading"
                      @click="onSubmit">保存</el-button>
         </el-form-item>
       </el-form>
@@ -66,27 +73,54 @@
 </template>
 <script>
 
+import { Message } from 'element-ui'
+import moment from 'moment'
+import { updateUserInfoAPI } from '@/services/services'
+
 
 export default {
 
   data () {
+    let userInfo = JSON.parse(sessionStorage.getItem('userInfo'))
     return {
       basicInfoData: {
-        nickName: '杜若',
-        realName: '李文',
-        gender: '1',
-        birthDate: '2020-09-08',
-        currentAddress: '西安市雁塔区',
-        emailAddress: '1401675454@qq.com',
-        createTime: '2021-11-29',
-        imgUrl: ''
-
+        nickName: userInfo.nickName,
+        realName: userInfo.realName,
+        gender: userInfo.gender,
+        birthDate: userInfo.birthDate,
+        currentAddress: userInfo.currentAddress,
+        emailAddress: userInfo.emailAddress,
+        createTime: moment(userInfo.createTime).format('YYYY-MM-DD hh:mm:ss'),
+        imgUrl: userInfo.imgUrl,
+        nation: userInfo.nation
       },
+      editLoading: false
 
     }
   },
 
   methods: {
+
+    //保存
+    onSubmit () {
+      this.$refs.basicInfoData.validate((valid) => {
+        if (valid) {
+          this.editLoading = true
+          updateUserInfoAPI({
+            ...this.basicInfoData, birthDate: this.basicInfoData.birthDate ? moment(this.basicInfoData.birthDate).format('YYYY-MM-DD') : null
+          }).then((res) => {
+            this.editLoading = false
+            if (res.description === 'success') {
+              Message.success({ message: '修改成功!' })
+              sessionStorage.setItem('userInfo', update(this.basicInfoData));
+            } else {
+              Message.success({ message: `修改失败！` })
+              return false;
+            }
+          })
+        }
+      });
+    },
     // 获取图片信息
     getImageFile (file, fileList) {
       this.getImageBase64(file.raw).then((res) => {
@@ -134,7 +168,7 @@ export default {
 <style scoped >
 .basicinfo-manage {
   width: 100%;
-  height: 100%;
+  height: calc(100% - 40px);
   overflow: auto;
   display: flex;
   justify-content: space-between;
