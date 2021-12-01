@@ -94,17 +94,19 @@
         <el-form-item label="赏金"
                       prop="reward"
                       width="300px">
-          <el-input v-model.number="addData.reward"
+          <el-input v-model="addData.reward"
                     placeholder="请输入赏金"></el-input>
         </el-form-item>
         <el-form-item label="上传图片"
                       prop="imageUrl">
-          <el-upload :class="{ hide: hideUploadEdit }"
-                     action=""
+          <el-upload action=""
                      :on-change="getImageFile"
                      :on-remove="handlePicRemove"
                      :on-preview="handlePicPreview"
+                     :on-exceed="handleExceed"
+                     :on-success="onSuccess"
                      :limit="5"
+                     :file-list="fileList"
                      list-type="picture-card"
                      :auto-upload="false">
             <i class="el-icon-plus"></i>
@@ -170,6 +172,18 @@ import moment from 'moment'
 export default {
 
   data () {
+    var validateReward = (rule, value, callback) => {
+      if (value) {
+        let reg = /^(([1-9]{1}\d*)|(0{1}))(\.\d{1,2})?$/
+        if (!reg.test(value)) {
+          callback(new Error('金额必须为正整数且最多包含两位小数'))
+        } else {
+          callback()
+        }
+      }
+      callback()
+    }
+
     return {
       addData: {
         title: '',
@@ -177,6 +191,7 @@ export default {
         reward: '',
         imageUrl: []
       },
+      fileList: [],
       dialogImageUrl: "",
       dialogVisible: false,
       hideUploadEdit: false, // 是否隐藏上传按钮
@@ -191,7 +206,7 @@ export default {
         ],
         reward: [
           { required: true, message: '请输入赏金', trigger: 'blur' },
-          { type: 'number', message: '赏金必须为数字值' }
+          { validator: validateReward, trigger: 'blur' }
         ]
       },
       publishList: [],
@@ -272,12 +287,24 @@ export default {
     },
     // 获取图片信息
     getImageFile (file, fileList) {
-      this.getImageBase64(file.raw).then(async (res) => {
-        const imgSrc = await this.compressImg(res, 1000, 1000)
-        this.addData.imageUrl.push(imgSrc);
-      });
-      // 大于1张隐藏
-      this.hideUploadEdit = fileList.length >= 1;
+      if (this.addData.imageUrl.length < 5) {
+        this.getImageBase64(file.raw).then(async (res) => {
+          const imgSrc = await this.compressImg(res, 1000, 1000)
+          this.addData.imageUrl.push(imgSrc);
+          // this.fileList.push({ name: file.name, url: imgSrc })
+          // console.log(this.fileList.length)
+
+        });
+      }
+    },
+    onSuccess (res, file, fileList) {
+      console.log(res)
+      console.log(file)
+      console.log(fileList)
+      // // 成功实现的版本1
+      // this.imgList.push(file);
+      // // 成功实现的版本2
+      // this.imgList = fileList;
     },
     compressImg (img, mx, mh) {
       return new Promise((resolve, reject) => {
@@ -333,15 +360,20 @@ export default {
     },
     //删除
     handlePicRemove (file, fileList) {
-      this.hideUploadEdit = fileList.length >= 1;
       this.getImageBase64(file.raw).then((res) => {
         this.addData.imageUrl.filter((item) => item !== res);
+        this.fileList.filter((item) => item.imgSrc !== res);
       });
     },
     //预览
     handlePicPreview (file) {
       this.dialogImageUrl = file.url;
       this.dialogVisible = true;
+    },
+    handleExceed () {
+      Message.error({
+        message: '最多上传5张图片！'
+      });
     },
     tableRowClassName ({ rowIndex }) {
       if (rowIndex === 1) {
