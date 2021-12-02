@@ -172,6 +172,7 @@
 import { publishListAPI, publishCreateAPI, publishDetailAPI, publishUpdateAPI } from '@/services/services'
 import { Message } from 'element-ui'
 import moment from 'moment'
+import _ from 'lodash'
 
 export default {
 
@@ -285,7 +286,9 @@ export default {
           if (this.modalName === '新建发布') {
             let imageUrl = []
             this.addData.fileList.length && this.addData.fileList.map((item) => imageUrl.push(item.url))
-            publishCreateAPI({ ...this.addData, imageUrl: JSON.stringify(imageUrl) }).then((res) => {
+            let params = _.cloneDeep(this.addData)
+            delete this.params.fileList
+            publishCreateAPI({ ...params, imageUrl: JSON.stringify(imageUrl) }).then((res) => {
               this.addLoading = false
               if (res.description === 'success') {
                 Message.success({ message: '操作成功！' })
@@ -300,7 +303,9 @@ export default {
           if (this.modalName === '编辑发布') {
             let imageUrl = []
             this.addData.fileList.length && this.addData.fileList.map((item) => imageUrl.push(item.url))
-            publishUpdateAPI({ publishInfoId: this.currentItem.id, ...this.addData, imageUrl: JSON.stringify(imageUrl) }).then((res) => {
+            let params = _.cloneDeep(this.addData)
+            delete params.fileList
+            publishUpdateAPI({ publishInfoId: this.currentItem.id, ...params, imageUrl: JSON.stringify(imageUrl) }).then((res) => {
               this.addLoading = false
               if (res.description === 'success') {
                 Message.success({ message: '操作成功！' })
