@@ -53,6 +53,7 @@
                          type="text"
                          size="small">查看</el-button>
               <el-button type="text"
+                         @click="editPublish(scope.row)"
                          size="small">编辑</el-button>
             </template>
           </el-table-column>
@@ -72,9 +73,10 @@
 
     </div>
 
-    <el-dialog title="新增发布"
+    <el-dialog :title="modalName"
                :visible.sync="addVisable"
-               :destroy-on-close="true">
+               :destroy-on-close="true"
+               @close='resetForms'>
       <el-form ref="addData"
                :model="addData"
                :rules="rules"
@@ -99,7 +101,7 @@
                     placeholder="请输入赏金"></el-input>
         </el-form-item>
         <el-form-item label="上传图片"
-                      prop="imageUrl">
+                      prop="fileList">
           <el-upload action=""
                      :on-change="getImageFile"
                      :on-remove="handlePicRemove"
@@ -107,7 +109,7 @@
                      :on-exceed="handleExceed"
                      :on-success="onSuccess"
                      :limit="5"
-                     :file-list="fileList"
+                     :file-list="addData.fileList"
                      list-type="picture-card"
                      :auto-upload="false">
             <i class="el-icon-plus"></i>
@@ -167,7 +169,7 @@
 </template>
 <script>
 
-import { publishListAPI, publishCreateAPI, publishDetailAPI } from '@/services/services'
+import { publishListAPI, publishCreateAPI, publishDetailAPI, publishUpdateAPI } from '@/services/services'
 import { Message } from 'element-ui'
 import moment from 'moment'
 
@@ -191,10 +193,10 @@ export default {
         title: '',
         description: '',
         reward: '',
-        imageUrl: []
+        fileList: []
       },
-      fileList: [],
       dialogImageUrl: "",
+      modalName: '新建发布',
       dialogVisible: false,
       hideUploadEdit: false, // 是否隐藏上传按钮
       addVisable: false,
@@ -220,7 +222,8 @@ export default {
 
       },
       detailVisable: false,
-      detailLoading: false
+      detailLoading: false,
+      currentItem: {}
     }
   },
 
@@ -229,7 +232,13 @@ export default {
   },
 
   methods: {
+    resetForms () {
+      this.$refs.addData.resetFields();
+    },
     handleAddVisable (visible) {
+      if (visible) {
+        this.modalName = '新建发布'
+      }
       this.addVisable = visible
     },
     //获取发布信息列表
@@ -273,39 +282,71 @@ export default {
       this.$refs.addData.validate((valid) => {
         if (valid) {
           this.addLoading = true
-          publishCreateAPI({ ...this.addData, imageUrl: JSON.stringify(this.addData.imageUrl) }).then((res) => {
-            this.addLoading = false
-            if (res.description === 'success') {
-              Message.success({ message: '操作成功！' })
-              this.handleAddVisable(false)
-              this.getPublishList()
-            } else {
-              Message.error({ message: `${res.description}！` })
-            }
-          })
+          if (this.modalName === '新建发布') {
+            let imageUrl = []
+            this.addData.fileList.length && this.addData.fileList.map((item) => imageUrl.push(item.url))
+            publishCreateAPI({ ...this.addData, imageUrl: JSON.stringify(imageUrl) }).then((res) => {
+              this.addLoading = false
+              if (res.description === 'success') {
+                Message.success({ message: '操作成功！' })
+                this.handleAddVisable(false)
+                this.pageNum = 1
+                this.getPublishList()
+              } else {
+                Message.error({ message: `${res.description}！` })
+              }
+            })
+          }
+          if (this.modalName === '编辑发布') {
+            let imageUrl = []
+            this.addData.fileList.length && this.addData.fileList.map((item) => imageUrl.push(item.url))
+            publishUpdateAPI({ publishInfoId: this.currentItem.id, ...this.addData, imageUrl: JSON.stringify(imageUrl) }).then((res) => {
+              this.addLoading = false
+              if (res.description === 'success') {
+                Message.success({ message: '操作成功！' })
+                this.handleAddVisable(false)
+                this.pageNum = 1
+                this.getPublishList()
+              } else {
+                Message.error({ message: `${res.description}！` })
+              }
+            })
+          }
+
         }
       });
+    },
+    //编辑
+    editPublish (item) {
+      this.modalName = '编辑发布'
+      this.addVisable = true
+      this.currentItem = item
+      publishDetailAPI({ publishInfoId: item.id }).then((res) => {
+        if (res.description === 'success') {
+          let result = {
+            title: res.data.title,
+            description: res.data.description,
+            reward: res.data.reward,
+            fileList: []
+          }
+
+          res.data.imageUrl.length && res.data.imageUrl.map((item, index) => {
+            result.fileList.push({ name: index, url: item })
+          })
+          this.addData = result
+        }
+      })
     },
     // 获取图片信息
     getImageFile (file, fileList) {
       if (this.addData.imageUrl.length < 5) {
         this.getImageBase64(file.raw).then(async (res) => {
           const imgSrc = await this.compressImg(res, 1000, 1000)
-          this.addData.imageUrl.push(imgSrc);
-          // this.fileList.push({ name: file.name, url: imgSrc })
-          // console.log(this.fileList.length)
-
+          this.addData.fileList.push(imgSrc);
         });
       }
     },
     onSuccess (res, file, fileList) {
-      console.log(res)
-      console.log(file)
-      console.log(fileList)
-      // // 成功实现的版本1
-      // this.imgList.push(file);
-      // // 成功实现的版本2
-      // this.imgList = fileList;
     },
     compressImg (img, mx, mh) {
       return new Promise((resolve, reject) => {
@@ -361,10 +402,15 @@ export default {
     },
     //删除
     handlePicRemove (file, fileList) {
-      this.getImageBase64(file.raw).then((res) => {
-        this.addData.imageUrl.filter((item) => item !== res);
-        this.fileList.filter((item) => item.imgSrc !== res);
-      });
+      let newResult = []
+
+      this.addData.fileList.map((item) => {
+        if (item.url !== file.url) {
+          newResult.push(item)
+        }
+      })
+      this.addData.fileList = newResult
+      console.log(this.addData)
     },
     //预览
     handlePicPreview (file) {

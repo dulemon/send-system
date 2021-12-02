@@ -26,6 +26,7 @@
                :visible.sync="couponModalVisible"
                :before-close="handleClose"
                :destroy-on-close="true"
+               @close="resetForms('couponData')"
                width="500px">
       <el-form :model="couponData"
                ref="couponData"
@@ -51,6 +52,7 @@
                :visible.sync="withdrawalModalVisible"
                :before-close="handleClose"
                :destroy-on-close="true"
+               @close="resetForms('withdrawalData')"
                width="500px">
       <el-form :model="withdrawalData"
                ref="withdrawalData"
@@ -123,6 +125,10 @@ export default {
   },
 
   methods: {
+
+    resetForms (form) {
+      this.$refs[form].resetFields();
+    },
 
     getWalletData () {
       walletInfoAPI().then(res => {

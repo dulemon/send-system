@@ -50,6 +50,11 @@ export const publishCreateAPI = data => {
   return post("/publish/create", data);
 };
 
+//编辑发布
+export const publishUpdateAPI = data => {
+  return put("/publish/update", data);
+};
+
 // 发布信息列表
 export const publishListAPI = data => {
   return get("/publish/list", data);
