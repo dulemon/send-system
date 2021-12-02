@@ -73,7 +73,8 @@
     </div>
 
     <el-dialog title="新增发布"
-               :visible.sync="addVisable">
+               :visible.sync="addVisable"
+               :destroy-on-close="true">
       <el-form ref="addData"
                :model="addData"
                :rules="rules"
@@ -131,7 +132,8 @@
 
     <el-dialog title="详情"
                :visible.sync="detailVisable"
-               width="60%">
+               width="60%"
+               :destroy-on-close="true">
       <div class="detail-content"
            v-loading="detailLoading">
         <div class="first">
@@ -271,7 +273,6 @@ export default {
       this.$refs.addData.validate((valid) => {
         if (valid) {
           this.addLoading = true
-          console.log(this.addData.imageUrl)
           publishCreateAPI({ ...this.addData, imageUrl: JSON.stringify(this.addData.imageUrl) }).then((res) => {
             this.addLoading = false
             if (res.description === 'success') {
