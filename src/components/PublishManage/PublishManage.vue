@@ -132,7 +132,7 @@
       </span>
     </el-dialog>
 
-    <el-dialog title="详情"
+    <el-dialog :title="detailTtitle"
                :visible.sync="detailVisable"
                width="60%"
                :destroy-on-close="true">
@@ -196,6 +196,7 @@ export default {
         reward: '',
         fileList: []
       },
+      detailTtitle: '详情',
       dialogImageUrl: "",
       modalName: '新建发布',
       dialogVisible: false,
@@ -267,6 +268,18 @@ export default {
             3: '良好',
             4: '优秀',
             5: '极好'
+          }
+          if (res.data.auditStatus === 1) {
+            this.detailTtitle = '详情-(待审核)'
+
+          }
+          if (res.data.auditStatus === 2) {
+            this.detailTtitle = '详情-(审核通过)'
+
+          }
+          if (res.data.auditStatus === 2) {
+            this.detailTtitle = '详情-(审核不通过)'
+
           }
           this.detailData = { ...res.data, createTime: moment(res.data.createTime).format('YYYY-MM-DD hh:mm:ss'), creditLevel: level[res.data.creditLevel] }
 
