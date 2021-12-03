@@ -30,9 +30,29 @@ export const updateUserInfoAPI = data => {
   return put("/user/updateInfo", data);
 };
 
+// 获取余额及充值卡信息
+export const walletInfoAPI = data => {
+  return get("/wallet/rechargeVouchers", data);
+};
+
+// 充值
+export const couponAPI = data => {
+  return post("/wallet/recharge", data);
+};
+
+// 提现
+export const withdrawAPI = data => {
+  return post("/wallet/withdraw", data);
+};
+
 // 新建发布
 export const publishCreateAPI = data => {
   return post("/publish/create", data);
+};
+
+//编辑发布
+export const publishUpdateAPI = data => {
+  return put("/publish/update", data);
 };
 
 // 发布信息列表

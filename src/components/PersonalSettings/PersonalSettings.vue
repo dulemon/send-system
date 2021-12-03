@@ -6,18 +6,26 @@
       </div>
       <div class="content">
         <div class="left">
-          <span :class="{'active' : !currenTab}"
+          <span :class="{'active' : currenTab === 0}"
                 @click="handleClickTab(0)">基本信息</span>
-          <span :class="{'active' : currenTab}"
+          <span :class="{'active' : currenTab===1}"
                 @click="handleClickTab(1)">修改密码</span>
+          <span :class="{'active' : currenTab===2}"
+                @click="handleClickTab(2)">
+            账户中心
+          </span>
         </div>
         <div class="right"
              v-if="currenTab=== 0">
           <BasicInfoManage />
         </div>
         <div class="right"
-             v-else>
+             v-else-if="currenTab===1">
           <PasswordManage />
+        </div>
+        <div class="right"
+             v-else>
+          <WalletCenter />
         </div>
       </div>
     </div>
@@ -27,11 +35,13 @@
 
 import PasswordManage from './PasswordManage'
 import BasicInfoManage from './BasicInfoManage'
+import WalletCenter from './WalletCenter'
 
 export default {
   components: {
     PasswordManage,
-    BasicInfoManage
+    BasicInfoManage,
+    WalletCenter
   },
   data () {
     return {

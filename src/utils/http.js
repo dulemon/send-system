@@ -27,7 +27,7 @@ export function get(url, params) {
         params: params
       })
       .then(res => {
-        if (res.data.status == "200") {
+        if (res.status == 200) {
           resolve(res.data);
         } else {
           Message.error({
@@ -46,7 +46,8 @@ export function post(url, params) {
     axios
       .post(url, params)
       .then(res => {
-        if (res.data.status == "200") {
+        console.log(res);
+        if (res.status == 200) {
           resolve(res.data);
         } else {
           Message.error({
@@ -65,7 +66,7 @@ export function put(url, params) {
     axios
       .put(url, params)
       .then(res => {
-        if (res.data.status == "200") {
+        if (res.status == 200) {
           resolve(res.data);
         } else {
           Message.error({
