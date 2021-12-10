@@ -12,13 +12,14 @@
     <div class="wallets"
          :style="!show? 'display:none' :'display:flex' ">
       <div class="wallet-item"
-           @click="coupon(item)"
            v-for="item in rechargeVouchers"
            :key="item.id">
         <div class="left"> <span>￥{{item.money}}元</span></div>
         <div class="right">
-          <span>{{item.cardId}}</span>
-          <span>立即充值</span>
+          <span class="text">{{item.cardId}}</span>
+          <span class="text"
+                v-if="item.btnName === '立即充值'">卡密：{{item.cardPassword}}</span>
+          <span @click="coupon(item)">{{item.btnName}}</span>
         </div>
       </div>
     </div>
@@ -117,7 +118,7 @@ export default {
           { validator: validateMoney, trigger: 'blur' }
         ]
       },
-      currentItem: ''
+      currentItem: '',
     }
   },
   mounted () {
@@ -134,7 +135,7 @@ export default {
       walletInfoAPI().then(res => {
         if (res.description === 'success') {
           this.balance = res.data.balance
-          this.rechargeVouchers = res.data.vouchersList
+          this.rechargeVouchers = res.data.vouchersList.map((item) => { return { ...item, btnName: '立即使用' } })
         }
       })
     },
@@ -149,8 +150,18 @@ export default {
 
     //充值
     coupon (item) {
-      this.couponModalVisible = true
-      this.currentItem = item
+      if (item.btnName === '立即充值') {
+        this.couponModalVisible = true
+        this.currentItem = item
+      } else {
+        this.rechargeVouchers.map(i => {
+          if (i.cardId === item.cardId) {
+            item.btnName = '立即充值'
+          }
+        })
+
+      }
+
     },
 
     // 确定
@@ -235,14 +246,14 @@ export default {
 }
 .wallet-item .left {
   background: linear-gradient(to right, #e7930e, #e7930e69);
-  width: 100px;
+  width: 80px;
   color: #fff;
   border-top-left-radius: 8px;
   border-bottom-left-radius: 8px;
   display: flex;
   justify-content: center;
   align-items: center;
-  font-size: 18px;
+  font-size: 16px;
 }
 .wallet-item .right {
   border-top-right-radius: 8px;
@@ -250,14 +261,25 @@ export default {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  align-items: center;
   font-size: 14px;
-  width: calc(100% - 100px);
-  padding: 5px 0;
+  width: calc(100% - 80px);
+  padding: 5px 10px;
+  position: relative;
+  padding-bottom: 20px;
 }
-.wallet-item .right span:nth-child(2) {
-  padding-top: 10px;
+.wallet-item .right span.text {
+  display: block;
+  text-align: center;
+}
+.wallet-item .right span:nth-last-child(1) {
   cursor: pointer;
+  color: #0080ff;
+  display: block;
+  text-align: right;
+  position: absolute;
+  right: 10px;
+  bottom: 10px;
+  font-size: 12px;
 }
 .submit {
   display: flex;
