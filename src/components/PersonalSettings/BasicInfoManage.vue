@@ -119,9 +119,21 @@ export default {
             createTime: moment(userInfo.createTime).format('YYYY-MM-DD hh:mm:ss'),
             profilePhoto: userInfo.profilePhoto,
             nation: userInfo.nation,
-            creditLevel: level[userInfo.creditLevel]
-
-
+          }
+          if (userInfo.creditLevel < 60) {
+            this.basicInfoData.creditLevel = '较差'
+          }
+          if (60 <= userInfo.creditLevel < 70) {
+            this.basicInfoData.creditLevel = '中等'
+          }
+          if (70 <= userInfo.creditLevel < 80) {
+            this.basicInfoData.creditLevel = '良好'
+          }
+          if (80 <= userInfo.creditLevel < 90) {
+            this.basicInfoData.creditLevel = '优秀'
+          }
+          if (90 <= userInfo.creditLevel < 100) {
+            this.basicInfoData.creditLevel = '极好'
           }
         }
       })

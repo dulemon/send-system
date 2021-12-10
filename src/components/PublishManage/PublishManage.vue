@@ -1,68 +1,100 @@
 <template>
   <div class="publish-manage">
-    <div class="options">
-      <el-button type="primary"
-                 @click="handleAddVisable(true)">新增发布</el-button>
-
+    <div class="publish-manage-options">
+      <div class="publish-manage-options-line">
+        <div class="publish-manage-options-item">
+          <span class="label">标题：</span>
+          <el-input v-model="title"
+                    style="width:calc( 100% - 80px )"
+                    placeholder="请输入标题"
+                    @change="(value) => changeOption(value, 'title')"
+                    clearable></el-input>
+        </div>
+        <div class="publish-manage-options-item">
+          <span class="label">发布时间：</span>
+          <el-date-picker v-model="time"
+                          type="datetimerange"
+                          range-separator="至"
+                          @change="(value) =>  changeOption(value, 'time')"
+                          clearable>
+          </el-date-picker>
+        </div>
+        <div class="publish-manage-options-item">
+          <span class="label"> 信誉等级：</span>
+          <el-select v-model="creditLevel"
+                     placeholder="请选择"
+                     @change="(value) =>  changeOption(value, 'creditLevel')"
+                     :clearable="true">
+            <el-option v-for="item in options"
+                       :key="item.value"
+                       :label="item.label"
+                       :value="item.value">
+            </el-option>
+          </el-select>
+        </div>
+      </div>
+      <div class="publish-manage-options-line">
+        <div class="publish-manage-options-item">
+          <span class="label">赏金区间：</span>
+          <div style="display: flex;align-items:center">
+            <el-input v-model="minReward"
+                      style="width:100px"
+                      clearable
+                      @change="(value) =>  changeOption(value, 'minReward')"
+                      placeholder=""></el-input> <span style="margin:0 10px">-</span>
+            <el-input v-model="maxReward"
+                      clearable
+                      @change="(value) =>  changeOption(value, 'maxReward')"
+                      style="width:100px"
+                      placeholder=""></el-input>
+          </div>
+        </div>
+        <div class="publish-manage-options-item">
+          <el-button type="primary"
+                     @click="getPublishList()">查询</el-button>
+        </div>
+      </div>
     </div>
-    <div class="wrap"
-         v-loading="tableLoading">
-      <div class="table">
-        <el-table :data="publishList"
-                  style="width: 100%"
-                  :row-class-name="tableRowClassName">
-          <el-table-column prop="index"
-                           label="序号"
-                           type="index">
-          </el-table-column>
 
-          <el-table-column prop="title"
-                           label="标题">
-          </el-table-column>
-          <el-table-column prop="description"
-                           label="描述">
-          </el-table-column>
-          <el-table-column prop="imageUrl"
-                           label="图片"
-                           width="180">
-            <template slot-scope="scope">
-              <el-image style="width: 100px; height: 100px"
-                        :src="scope.row.imageUrl[0]"
-                        fit="cover"></el-image>
-            </template>
-
-          </el-table-column>
-          <el-table-column prop="reward"
-                           label="赏金">
-            <template slot-scope="scope">
-              <span>{{ scope.row.reward}}元</span>
-
-            </template>
-          </el-table-column>
-          <el-table-column prop="auditStatus"
-                           label="状态">
-            <template slot-scope="scope">
-              <span>{{ scope.row.auditStatus === 1 ? '待审核' : (scope.row.auditStatus === 2 ?  '审核通过' : '审核不通过') }}</span>
-
-            </template>
-          </el-table-column>
-          <el-table-column fixed="right"
-                           label="操作">
-            <template slot-scope="scope">
-              <el-button @click="getPublishDetail(scope.row.id)"
-                         type="text"
-                         size="small">查看</el-button>
+    <div class="publish-manage-wrap"
+         v-loading="loading">
+      <el-empty v-if="publishList.length === 0"
+                :image-size="200"></el-empty>
+      <div v-else
+           class="publish-manage-content">
+        <el-card class="publish-manage-content-item"
+                 :body-style="{ padding: '0px' }"
+                 :key="item.id"
+                 v-for="item in publishList">
+          <el-image class="image"
+                    :src="item.imageUrl[0]"
+                    fit="cover">
+          </el-image>
+          <div class="title">
+            <span>{{item.title}}</span>
+            <span>￥{{item.reward}}元</span>
+          </div>
+          <div class="operate">
+            <time class="time">{{moment(item.publishTime).format('YYYY-MM-DD hh:mm:ss')}}</time>
+            <div>
               <el-button type="text"
-                         @click="editPublish(scope.row)"
-                         size="small">编辑</el-button>
-            </template>
-          </el-table-column>
-        </el-table>
+                         class="button"
+                         @click="getPublishDetail(item.id)">详情</el-button>
+              <el-popconfirm title="确定接单吗？"
+                             @confirm="orderCreate(item.id)">
+                <el-button type="text"
+                           class="button"
+                           slot="reference">接单</el-button>
+              </el-popconfirm>
+            </div>
+
+          </div>
+        </el-card>
 
       </div>
-      <div style="text-align: right; padding: 10px 0 10px 10px">
-        <el-pagination style="padding: 0"
-                       background
+      <div class="publish-manage-footer"
+           v-if="total > 0">
+        <el-pagination background
                        layout="prev, pager, next"
                        :current-page="pageNum"
                        :total="total"
@@ -73,66 +105,7 @@
 
     </div>
 
-    <el-dialog :title="modalName"
-               :visible.sync="addVisable"
-               :destroy-on-close="true"
-               @close='resetForms'>
-      <el-form ref="addData"
-               :model="addData"
-               :rules="rules"
-               label-width="100px">
-        <el-form-item label="标题"
-                      prop="title"
-                      width="300px">
-          <el-input v-model="addData.title"
-                    placeholder="请输入标题"></el-input>
-        </el-form-item>
-        <el-form-item label="描述"
-                      prop="description"
-                      width="300px">
-          <el-input type="textarea"
-                    v-model="addData.description"
-                    placeholder="请输入描述信息"></el-input>
-        </el-form-item>
-        <el-form-item label="赏金"
-                      prop="reward"
-                      width="300px">
-          <el-input v-model="addData.reward"
-                    placeholder="请输入赏金"></el-input>
-        </el-form-item>
-        <el-form-item label="上传图片"
-                      prop="fileList">
-          <el-upload action=""
-                     :on-change="getImageFile"
-                     :on-remove="handlePicRemove"
-                     :on-preview="handlePicPreview"
-                     :on-exceed="handleExceed"
-                     :on-success="onSuccess"
-                     :limit="5"
-                     :file-list="addData.fileList"
-                     list-type="picture-card"
-                     :auto-upload="false">
-            <i class="el-icon-plus"></i>
-          </el-upload>
-          <el-dialog :visible.sync="dialogVisible">
-            <img width="100%"
-                 :src="dialogImageUrl"
-                 alt="" />
-          </el-dialog>
-
-        </el-form-item>
-      </el-form>
-
-      <span slot="footer"
-            class="dialog-footer">
-        <el-button @click="addVisable = false">取 消</el-button>
-        <el-button type="primary"
-                   @click="handleAdd"
-                   :loading="addLoading">确 定</el-button>
-      </span>
-    </el-dialog>
-
-    <el-dialog :title="detailTtitle"
+    <el-dialog title="详情"
                :visible.sync="detailVisable"
                width="60%"
                :destroy-on-close="true">
@@ -144,7 +117,7 @@
                        :src="detailData.profilePhoto"></el-avatar>
           </div>
           <div class="user">
-            <div class="credit"> <span>{{ detailData.nickName}}</span><span>信誉度{{detailData.creditLevel }}</span></div>
+            <div class="credit"> <span>{{ detailData.nickName}}</span><span>信誉等级{{detailData.creditLevel }}</span></div>
             <div class="create"><span>{{ detailData.createTime}}</span></div>
           </div>
         </div>
@@ -165,92 +138,83 @@
       </div>
 
     </el-dialog>
+
   </div>
 </template>
 <script>
-
-import { publishListAPI, publishCreateAPI, publishDetailAPI, publishUpdateAPI } from '@/services/services'
-import { Message } from 'element-ui'
+import { publishCenterAPI, publishDetailAPI, orderCreateAPI } from '@/services/services'
 import moment from 'moment'
-import _ from 'lodash'
+import { Message } from 'element-ui'
 
 export default {
 
   data () {
-    var validateReward = (rule, value, callback) => {
-      if (value) {
-        let reg = /^(([1-9]{1}\d*)|(0{1}))(\.\d{1,2})?$/
-        if (!reg.test(value)) {
-          callback(new Error('金额必须为正整数且最多包含两位小数'))
-        } else {
-          callback()
-        }
-      }
-      callback()
-    }
-
     return {
-      addData: {
-        title: '',
-        description: '',
-        reward: '',
-        fileList: []
+      title: '',
+      time: [],
+      creditLevel: null,
+      options: [{
+        value: 4,
+        label: '优秀'
+      }, {
+        value: 3,
+        label: '良好'
+      }, {
+        value: 2,
+        label: '中等'
       },
-      detailTtitle: '详情',
-      dialogImageUrl: "",
-      modalName: '新建发布',
-      dialogVisible: false,
-      hideUploadEdit: false, // 是否隐藏上传按钮
-      addVisable: false,
-      addLoading: false,
-      rules: {
-        title: [
-          { required: true, message: '请输入标题', trigger: 'blur' }
-        ],
-        description: [
-          { required: true, message: '请输入描述', trigger: 'blur' }
-        ],
-        reward: [
-          { required: true, message: '请输入赏金', trigger: 'blur' },
-          { validator: validateReward, trigger: 'blur' }
-        ]
+      {
+        value: 1,
+        label: '较差'
       },
+      ],
+      minReward: null,
+      maxReward: null,
+      loading: false,
       publishList: [],
       pageNum: 1,
-      pageSize: 5,
+      pageSize: 15,
       total: 0,
-      tableLoading: false,
       detailData: {
 
       },
       detailVisable: false,
       detailLoading: false,
-      currentItem: {}
+
+
+
     }
   },
-
   mounted () {
     this.getPublishList()
-  },
 
+  },
   methods: {
-    resetForms () {
-      this.$refs.addData.resetFields();
-    },
-    handleAddVisable (visible) {
-      if (visible) {
-        this.modalName = '新建发布'
-      }
-      this.addVisable = visible
-    },
+    moment,
     //获取发布信息列表
     getPublishList () {
-      this.tableLoading = true
-      publishListAPI({ pageNum: this.pageNum, pageSize: this.pageSize }).then(res => {
+      this.loading = true
+      const { title, creditLevel, time, pageNum, pageSize, minReward, maxReward } = this
+      let params = {
+        title,
+        creditLevel,
+        pageNum,
+        pageSize
+      }
+      console.log(time)
+      if (time.length === 2) {
+        params.beginTime = time[0].format('YYYY-MM-DD hh:mm:ss')
+        params.endTime = time[0].format('YYYY-MM-DD hh:mm:ss')
+      }
+      if (Number(minReward) >= 0 && Number(maxReward) > 0) {
+        params.minReward = minReward
+        params.maxReward = maxReward
+      }
+      publishCenterAPI(params).then(res => {
         if (res.description === 'success') {
           this.publishList = res.data.list
           this.total = res.data.total
-          this.tableLoading = false
+          this.loading = false
         }
       })
     },
@@ -262,27 +226,23 @@ export default {
       publishDetailAPI({ publishInfoId: id }).then((res) => {
         this.detailLoading = false
         if (res.description === 'success') {
-          const level = {
-            1: '较差',
-            2: '中等',
-            3: '良好',
-            4: '优秀',
-            5: '极好'
-          }
-          if (res.data.auditStatus === 1) {
-            this.detailTtitle = '详情-(待审核)'
+          this.detailData = { ...res.data, createTime: moment(res.data.createTime).format('YYYY-MM-DD hh:mm:ss') }
 
+          if (res.data.creditLevel < 60) {
+            this.detailData.creditLevel = '较差'
           }
-          if (res.data.auditStatus === 2) {
-            this.detailTtitle = '详情-(审核通过)'
-
+          if (res.data.creditLevel >= 60 && res.data.creditLevel < 70) {
+            this.detailData.creditLevel = '中等'
           }
-          if (res.data.auditStatus === 2) {
-            this.detailTtitle = '详情-(审核不通过)'
-
+          if (res.data.creditLevel >= 70 && res.data.creditLevel < 80) {
+            this.detailData.creditLevel = '良好'
           }
-          this.detailData = { ...res.data, createTime: moment(res.data.createTime).format('YYYY-MM-DD hh:mm:ss'), creditLevel: level[res.data.creditLevel] }
-
+          if (res.data.creditLevel >= 80 && res.data.creditLevel < 90) {
+            this.detailData.creditLevel = '优秀'
+          }
+          if (res.data.creditLevel >= 90 && res.data.creditLevel < 100) {
+            this.detailData.creditLevel = '极好'
+          }
         }
       })
     },
@@ -291,162 +251,27 @@ export default {
       this.pageNum = page
       this.getPublishList()
     },
-    // 新增发布
-    handleAdd () {
-      this.$refs.addData.validate((valid) => {
-        if (valid) {
-          this.addLoading = true
-          if (this.modalName === '新建发布') {
-            let imageUrl = []
-            this.addData.fileList.length && this.addData.fileList.map((item) => imageUrl.push(item.url))
-            let params = _.cloneDeep(this.addData)
-            delete this.params.fileList
-            publishCreateAPI({ ...params, imageUrl: JSON.stringify(imageUrl) }).then((res) => {
-              this.addLoading = false
-              if (res.description === 'success') {
-                Message.success({ message: '操作成功！' })
-                this.handleAddVisable(false)
-                this.pageNum = 1
-                this.getPublishList()
-              } else {
-                Message.error({ message: `${res.description}！` })
-              }
-            })
-          }
-          if (this.modalName === '编辑发布') {
-            let imageUrl = []
-            this.addData.fileList.length && this.addData.fileList.map((item) => imageUrl.push(item.url))
-            let params = _.cloneDeep(this.addData)
-            delete params.fileList
-            publishUpdateAPI({ publishInfoId: this.currentItem.id, ...params, imageUrl: JSON.stringify(imageUrl) }).then((res) => {
-              this.addLoading = false
-              if (res.description === 'success') {
-                Message.success({ message: '操作成功！' })
-                this.handleAddVisable(false)
-                this.pageNum = 1
-                this.getPublishList()
-              } else {
-                Message.error({ message: `${res.description}！` })
-              }
-            })
-          }
-
-        }
-      });
+    changeOption (value, type) {
+      this.pageNum = 1
+      switch (type) {
+        case 'title': this.title = value; break;
+        case 'time': this.time = value; break;
+        case 'creditLevel': this.creditLevel = value; break;
+        case 'minReward': this.minReward = value.replace(/[^0-9.]/g, "").trim(); break;
+        case 'maxReward': this.maxReward = value.replace(/[^0-9.]/g, "").trim(); break;
+        default:
+      }
     },
-    //编辑
-    editPublish (item) {
-      this.modalName = '编辑发布'
-      this.addVisable = true
-      this.currentItem = item
-      publishDetailAPI({ publishInfoId: item.id }).then((res) => {
+    orderCreate (id) {
+      orderCreateAPI({ publishInfoId: id }).then(res => {
         if (res.description === 'success') {
-          let result = {
-            title: res.data.title,
-            description: res.data.description,
-            reward: res.data.reward,
-            fileList: []
-          }
+          this.pageNum = 1
+          Message.success({ message: '接单成功！' })
+          this.getPublishList()
 
-          res.data.imageUrl.length && res.data.imageUrl.map((item, index) => {
-            result.fileList.push({ name: index, url: item })
-          })
-          this.addData = result
         }
       })
-    },
-    // 获取图片信息
-    getImageFile (file, fileList) {
-      if (this.addData.imageUrl.length < 5) {
-        this.getImageBase64(file.raw).then(async (res) => {
-          const imgSrc = await this.compressImg(res, 1000, 1000)
-          this.addData.fileList.push(imgSrc);
-        });
-      }
-    },
-    onSuccess (res, file, fileList) {
-    },
-    compressImg (img, mx, mh) {
-      return new Promise((resolve, reject) => {
-        const canvas = document.createElement('canvas')
-        const context = canvas.getContext('2d')
-        const { width: originWidth, height: originHeight } = img
-        let dataURL = ''
-        // 最大尺寸限制
-        const maxWidth = mx
-        const maxHeight = mh
-        // 目标尺寸
-        let targetWidth = originWidth
-        let targetHeight = originHeight
-        if (originWidth > maxWidth || originHeight > maxHeight) {
-          if (originWidth / originHeight > 1) {
-            // 宽图片
-            targetWidth = maxWidth
-            targetHeight = Math.round(maxWidth * (originHeight / originWidth))
-          } else {
-            // 高图片
-            targetHeight = maxHeight
-            targetWidth = Math.round(maxHeight * (originWidth / originHeight))
-          }
-        }
-        canvas.width = targetWidth
-        canvas.height = targetHeight
-        context.clearRect(0, 0, targetWidth, targetHeight)
-        // 图片绘制
-        context.drawImage(img, 0, 0, targetWidth, targetHeight)
-        dataURL = canvas.toDataURL('image/jpeg') // 转换图片为dataURL
-        resolve(dataURL)
-      })
-    },
-    //转换成base64方法
-    getImageBase64 (file) {
-      return new Promise((resolve, reject) => {
-        const img = new Image()
-        const reader = new FileReader()
-        reader.onload = function (e) {
-          img.src = e.target.result
-        }
-        reader.onerror = function (e) {
-          reject(e)
-        }
-        reader.readAsDataURL(file)
-        img.onload = function () {
-          resolve(img)
-        }
-        img.onerror = function (e) {
-          reject(e)
-        }
-      })
-    },
-    //删除
-    handlePicRemove (file, fileList) {
-      let newResult = []
 
-      this.addData.fileList.map((item) => {
-        if (item.url !== file.url) {
-          newResult.push(item)
-        }
-      })
-      this.addData.fileList = newResult
-      console.log(this.addData)
-    },
-    //预览
-    handlePicPreview (file) {
-      this.dialogImageUrl = file.url;
-      this.dialogVisible = true;
-    },
-    handleExceed () {
-      Message.error({
-        message: '最多上传5张图片！'
-      });
-    },
-    tableRowClassName ({ rowIndex }) {
-      if (rowIndex === 1) {
-        return 'warning-row'
-      } else if (rowIndex === 3) {
-        return 'success-row'
-      }
-      return ''
     }
   }
 }
@@ -457,44 +282,61 @@ export default {
 .publish-manage {
   width: 100%;
   height: 100%;
+  overflow-y: auto;
 }
-.options {
+.publish-manage-wrap {
+  /* background: #fff; */
+  padding: 10px;
+  height: calc(100% - 90px);
+  overflow-y: auto;
+}
+.publish-manage-content {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.publish-manage-content-item {
+  width: calc((100% - 90px) / 5);
+  margin-right: 20px;
   margin-bottom: 20px;
 }
-.wrap {
-  background: #fff;
-  padding: 20px;
+.publish-manage-content-item:nth-of-type(5n) {
+  margin-right: 0;
 }
-.martop {
-  margin-top: 20px;
-}
-.imgwidth {
-  width: 100px;
-  height: 100px;
-}
-.image-slot {
-  width: 100px;
-  height: 100px;
-}
-.image-slot i {
-  font-size: 100px;
-}
-.hide .el-upload--picture-card {
-  display: none;
-}
-.el-textarea,
-.el-input {
-  width: 400px;
-}
-.el-table .warning-row {
-  background: oldlace;
-}
-.el-table .success-row {
-  background: #f0f9eb;
-}
-.detail-content {
+.publish-manage-content-item .image {
+  object-fit: cover;
+  height: 150px;
   width: 100%;
-  height: 100%;
+}
+.publish-manage-content-item .title {
+  font-size: 14px;
+  padding: 5px 10px 0 10px;
+  display: flex;
+  justify-content: space-between;
+}
+.publish-manage-content-item .operate {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  padding: 0 10px;
+}
+.el-button + .el-button {
+  margin-left: 5px;
+}
+.publish-manage-options-line {
+  display: flex;
+  padding-bottom: 15px;
+}
+.publish-manage-options-item {
+  display: flex;
+  align-items: center;
+  margin-right: 20px;
+}
+.label {
+  width: 80px;
+  display: inline-block;
+  font-size: 14px;
 }
 >>> .el-dialog__body {
   padding: 5px 20px 20px 20px !important;
@@ -539,5 +381,9 @@ export default {
 .detail-content .forth {
   font-size: 13px;
   padding-bottom: 15px;
+}
+.publish-manage-footer {
+  display: flex;
+  justify-content: flex-end;
 }
 </style>

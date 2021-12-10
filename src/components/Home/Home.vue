@@ -61,24 +61,32 @@ export default {
   data () {
     return {
       menuList: [
+
         {
-          title: '发布管理',
-          url: '/home/publish/manage',
+          title: '我的发布',
+          url: '/home/my/publish',
           key: '1',
           icon: 'el-icon-menu'
 
         },
         {
-          title: '投诉管理',
+          title: '发布中心',
           url: '/home/publish/manage',
           key: '2',
+          icon: 'el-icon-eleme'
+
+        },
+        {
+          title: '投诉管理',
+          url: '/home/publish/manage',
+          key: '3',
           icon: 'el-icon-document'
 
         },
         {
           title: '订单管理',
           url: '/home/publish/manage',
-          key: '3',
+          key: '4',
           icon: 'el-icon-setting'
 
         }

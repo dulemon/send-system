@@ -55,6 +55,11 @@ export const publishUpdateAPI = data => {
   return put("/publish/update", data);
 };
 
+// 删除发布
+export const publishRemoveAPI = data => {
+  return put("/publish/remove", data);
+};
+
 // 发布信息列表
 export const publishListAPI = data => {
   return get("/publish/list", data);
@@ -63,4 +68,14 @@ export const publishListAPI = data => {
 // 发布详情
 export const publishDetailAPI = data => {
   return get("/publish/detail", data);
+};
+
+// 发布中心 list
+export const publishCenterAPI = data => {
+  return get("/receiver/search", data);
+};
+
+// 创建订单
+export const orderCreateAPI = data => {
+  return post("/order/create", data);
 };
