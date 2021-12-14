@@ -199,9 +199,9 @@ export default {
         title,
         creditLevel,
         pageNum,
-        pageSize
+        pageSize,
+        saleStatus: 1,
       }
-      console.log(time)
       if (time.length === 2) {
         params.beginTime = time[0].format('YYYY-MM-DD hh:mm:ss')
         params.endTime = time[0].format('YYYY-MM-DD hh:mm:ss')

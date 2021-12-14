@@ -41,10 +41,18 @@
           </el-table-column>
           <el-table-column prop="auditStatus"
                            label="状态">
-            <template slot-scope="scope">
-              <span>{{ scope.row.auditStatus === 1 ? '待审核' : (scope.row.auditStatus === 2 ?  '审核通过' : '审核不通过') }}</span>
 
+            <template slot-scope="scope">
+              <el-tooltip class="item"
+                          effect="dark"
+                          :content="scope.row.auditRemark"
+                          placement="top-start"
+                          v-if="scope.row.auditStatus === 3">
+                <span>审核不通过</span>
+              </el-tooltip>
+              <span v-else>{{scope.row.auditStatus === 1 ? '待审核':(scope.row.auditStatus === 2 ?  '审核通过' : '')}}</span>
             </template>
+
           </el-table-column>
           <el-table-column fixed="right"
                            label="操作">
@@ -271,6 +279,7 @@ export default {
       publishDetailAPI({ publishInfoId: id }).then((res) => {
         this.detailLoading = false
         if (res.description === 'success') {
+
           if (res.data.auditStatus === 1) {
             this.detailTtitle = '详情-(待审核)'
 
@@ -299,7 +308,6 @@ export default {
           if (res.data.creditLevel >= 90 && res.data.creditLevel < 100) {
             this.detailData.creditLevel = '极好'
           }
-
         }
       })
     },
@@ -317,7 +325,7 @@ export default {
             let imageUrl = []
             this.addData.fileList.length && this.addData.fileList.map((item) => imageUrl.push(item.url))
             let params = _.cloneDeep(this.addData)
-            delete this.params.fileList
+            delete params.fileList
             publishCreateAPI({ ...params, imageUrl: JSON.stringify(imageUrl) }).then((res) => {
               this.addLoading = false
               if (res.description === 'success') {
@@ -385,10 +393,10 @@ export default {
     },
     // 获取图片信息
     getImageFile (file, fileList) {
-      if (this.addData.imageUrl.length < 5) {
+      if (this.addData.fileList.length < 5) {
         this.getImageBase64(file.raw).then(async (res) => {
           const imgSrc = await this.compressImg(res, 1000, 1000)
-          this.addData.fileList.push(imgSrc);
+          this.addData.fileList.push({ name: '111', url: imgSrc });
         });
       }
     },
@@ -567,5 +575,8 @@ export default {
 .detail-content .forth {
   font-size: 13px;
   padding-bottom: 15px;
+}
+>>> .el-upload-list__item.is-ready {
+  display: none;
 }
 </style>

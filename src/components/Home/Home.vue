@@ -85,8 +85,14 @@ export default {
         },
         {
           title: '订单管理',
-          url: '/home/publish/manage',
+          url: '/home/order/manage',
           key: '4',
+          icon: 'el-icon-setting'
+        },
+        {
+          title: '审核中心',
+          url: '/home/audit/manage',
+          key: '5',
           icon: 'el-icon-setting'
 
         }

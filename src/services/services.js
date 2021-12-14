@@ -79,3 +79,18 @@ export const publishCenterAPI = data => {
 export const orderCreateAPI = data => {
   return post("/order/create", data);
 };
+
+//订单列表
+export const orderListAPI = data => {
+  return get("/order/list", data);
+};
+
+//修改订单状态
+export const updateOrderStatus = data => {
+  return put("/order/update", data);
+};
+
+// 审核
+export const auditAPI = data => {
+  return put("/audit/publishInfo", data);
+};

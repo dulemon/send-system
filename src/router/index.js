@@ -6,6 +6,8 @@ import Home from "@/components/Home/Home";
 import PersonalSettings from "@/components/PersonalSettings/PersonalSettings";
 import MyPublish from "@/components/MyPublish/MyPublish";
 import PublishManage from "@/components/PublishManage/PublishManage";
+import AuditManage from "@/components/AuditManage/AuditManage";
+import OrderManage from "@/components/OrderManage/OrderManage";
 
 Vue.use(Router);
 
@@ -41,6 +43,14 @@ export default new Router({
         {
           path: "/home/publish/manage",
           component: PublishManage
+        },
+        {
+          path: "/home/audit/manage",
+          component: AuditManage
+        },
+        {
+          path: "/home/order/manage",
+          component: OrderManage
         }
       ]
     }
