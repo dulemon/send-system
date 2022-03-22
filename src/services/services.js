@@ -90,7 +90,12 @@ export const updateOrderStatus = data => {
   return put("/order/update", data);
 };
 
-// 审核
+// 审核订单
 export const auditAPI = data => {
   return put("/audit/publishInfo", data);
+};
+
+// 投诉
+export const complaintAPI = data => {
+  return put("/order/complaint", data);
 };

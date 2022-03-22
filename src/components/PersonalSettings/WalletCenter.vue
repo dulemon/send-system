@@ -246,7 +246,7 @@ export default {
 }
 .wallet-item .left {
   background: linear-gradient(to right, #e7930e, #e7930e69);
-  width: 80px;
+  width: 100px;
   color: #fff;
   border-top-left-radius: 8px;
   border-bottom-left-radius: 8px;

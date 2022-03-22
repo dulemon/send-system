@@ -7,7 +7,8 @@
         <span slot="label"><i class="el-icon-date"></i> 我的发布</span>
         <div class="order-wrap"
              v-loading="loading">
-          <div class="order-content">
+          <div class="order-content"
+               v-if="orderList.length > 0">
             <div class="order-content-item"
                  :key="item.id"
                  v-for="item in orderList">
@@ -35,11 +36,11 @@
                 <div class="order-content-item-second-right">
                   <div style="text-align:right">
                     <span v-if="item.orderStatus === 1">处理中</span>
-                    <span v-else-if="item.orderStatus === 2">接单人已完成</span>
+                    <span v-else-if="item.orderStatus === 2">接单人已提交</span>
                     <span v-else-if="item.orderStatus === 3">交易已完成</span>
                     <span v-else>交易已取消</span>
                   </div>
-                  <div>
+                  <div style="text-align:right">
                     <el-button size="mini"
                                type="primary"
                                v-if="item.orderStatus === 2"
@@ -60,13 +61,19 @@
                            @current-change="handleCurrentChange">
             </el-pagination>
           </div>
+          <div v-if="!loading && orderList.length === 0">
+            <el-empty :image-size="200"></el-empty>
+          </div>
         </div>
+
       </el-tab-pane>
       <el-tab-pane label="我已接单"
                    name="2">
         <span slot="label"><i class=" el-icon-reading"></i> 我已接单</span>
-        <div class="order-wrap">
-          <div class="order-content">
+        <div class="order-wrap"
+             v-loading="loading">
+          <div class="order-content"
+               v-if="orderList.length > 0">
             <div class="order-content-item"
                  :key="item.id"
                  v-for="item in orderList">
@@ -94,11 +101,17 @@
                 <div class="order-content-item-second-right">
                   <div style="text-align:right">
                     <span v-if="item.orderStatus === 1">处理中</span>
-                    <span v-else-if="item.orderStatus === 2">已完成</span>
-                    <span v-else-if="item.orderStatus === 3">交易已完成</span>
-                    <span v-else>交易已取消</span>
+                    <span v-else-if="item.orderStatus === 2">已提交</span>
+                    <span v-else-if="item.orderStatus === 3 && item.complaintStatus === 1">交易已完成</span>
+                    <span v-else-if="item.orderStatus === 3 && item.complaintStatus === 2">已投诉,待审核</span>
+                    <span v-else-if="item.orderStatus === 3 && item.complaintStatus === 3">投诉通过</span>
+                    <span v-else-if="item.orderStatus === 3 && item.complaintStatus === 4">投诉未通过</span>
+                    <span v-else-if="item.orderStatus === 4">交易已取消</span>
+
                   </div>
-                  <div v-if="item.orderStatus === 1">
+
+                  <div v-if="item.orderStatus === 1"
+                       style="text-align:right">
                     <el-button size="mini"
                                type="primary"
                                :loading="updateLoading && currentOrderId === item.orderId "
@@ -107,6 +120,12 @@
                                type="primary"
                                :loading="cancelLoading && currentOrderId === item.orderId"
                                @click="updateStatus(item.orderId, 4)">取消订单</el-button>
+                  </div>
+                  <div v-else-if="item.orderStatus === 3 && item.complaintStatus === 1"
+                       style="text-align:right">
+                    <el-button size="mini"
+                               type="primary"
+                               @click="complaintOrder(item.orderId)">投诉</el-button>
                   </div>
 
                 </div>
@@ -123,7 +142,11 @@
                            @current-change="handleCurrentChange">
             </el-pagination>
           </div>
+          <div v-if="!loading && orderList.length === 0">
+            <el-empty :image-size="200"></el-empty>
+          </div>
         </div>
+
       </el-tab-pane>
     </el-tabs>
     <el-dialog title="详情"
@@ -159,12 +182,36 @@
       </div>
 
     </el-dialog>
+    <el-dialog width="40%"
+               title="投诉"
+               :visible.sync="complaintVisible"
+               append-to-body>
+      <el-form :model="complaint"
+               :rules="rules"
+               ref="complaint"
+               label-width="60px"
+               class="demo-ruleForm">
+        <el-form-item label="备注"
+                      prop="complaintRemark">
+          <el-input v-model="complaint.complaintRemark"
+                    type="textarea"
+                    :rows="4"></el-input>
+        </el-form-item>
+        <div class="order-footer">
+          <el-button type="primary"
+                     @click="complaintConfirm"
+                     :loading="complaintLoading"> 确定</el-button>
+          <el-button type="default"
+                     @click="complaintVisible = false"> 取消</el-button>
+        </div>
+      </el-form>
+    </el-dialog>
 
   </div>
 </template>
 <script>
 
-import { orderListAPI, publishDetailAPI, updateOrderStatus } from '@/services/services'
+import { orderListAPI, publishDetailAPI, updateOrderStatus, complaintAPI } from '@/services/services'
 import moment from 'moment'
 import { Message } from 'element-ui'
 
@@ -184,7 +231,17 @@ export default {
       detailLoading: false,
       updateLoading: false,
       cancelLoading: false,
-      currentOrderId: null
+      currentOrderId: null,
+      complaint: {
+        complaintRemark: ''
+      },
+      rules: {
+        complaintRemark: [{ required: true, message: '请输入备注', trigger: 'blur' }]
+      },
+      complaintVisible: false,
+      complaintLoading: false
+
+
     }
   },
   mounted () {
@@ -261,6 +318,28 @@ export default {
           Message.error({ message: `${res.description}！` })
         }
 
+      })
+
+    },
+    // 投诉
+    complaintOrder (orderId) {
+      this.complaintVisible = true
+      this.currentOrderId = orderId
+    },
+    complaintConfirm () {
+      this.$refs.complaint.validate((valid) => {
+        this.complaintLoading = true
+        complaintAPI({ orderId: this.currentOrderId, complaintRemark: this.complaint.complaintRemark }).then(res => {
+          this.complaintLoading = false
+          if (res.description === 'success') {
+            this.complaintVisible = false
+            this.pageNum = 1
+            Message.success({ message: '操作成功！' })
+            this.getOrderList()
+          } else {
+            Message.error({ message: res.description })
+          }
+        })
       })
 
     }
@@ -374,9 +453,5 @@ export default {
 .detail-content .forth {
   font-size: 13px;
   padding-bottom: 15px;
-}
-.publish-manage-footer {
-  display: flex;
-  justify-content: flex-end;
 }
 </style>

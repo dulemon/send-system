@@ -212,7 +212,7 @@ export default {
       }
       publishCenterAPI(params).then(res => {
         if (res.description === 'success') {
-          this.publishList = res.data.list
+          this.publishList = res.data.list.filter((item) => item.auditStatus === 2)
           this.total = res.data.total
           this.loading = false
         }
@@ -268,7 +268,8 @@ export default {
           this.pageNum = 1
           Message.success({ message: '接单成功！' })
           this.getPublishList()
-
+        } else {
+          Message.error({ message: res.description })
         }
       })
 

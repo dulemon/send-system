@@ -255,6 +255,7 @@ export default {
       this.$refs.addData.resetFields();
     },
     handleAddVisable (visible) {
+      this.addLoading = false
       if (visible) {
         this.modalName = '新建发布'
       }

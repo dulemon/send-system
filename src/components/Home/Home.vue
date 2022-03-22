@@ -28,16 +28,14 @@
     </div>
     <div class="wrap">
       <div class="left">
-        <el-menu :default-active="currentActive"
-                 class="el-menu-vertical-demo"
-                 @open="handleOpen"
-                 @close="handleClose">
+        <el-menu :default-active="$route.path"
+                 class="el-menu-vertical-demo">
 
-          <el-menu-item :index="item.key"
+          <el-menu-item :index="$route.path"
                         v-for="item in menuList"
                         :key="item.key">
-            <i :class="item.icon"></i>
             <router-link :to="item.url">
+              <i :class="item.icon"></i>
               <span>{{item.title}}</span>
             </router-link>
           </el-menu-item>
@@ -60,49 +58,31 @@ import { getUserInfoAPI } from '@/services/services'
 export default {
   data () {
     return {
-      menuList: [
-
-        {
-          title: '我的发布',
-          url: '/home/my/publish',
-          key: '1',
-          icon: 'el-icon-menu'
-
-        },
-        {
-          title: '发布中心',
-          url: '/home/publish/manage',
-          key: '2',
-          icon: 'el-icon-eleme'
-
-        },
-        {
-          title: '投诉管理',
-          url: '/home/publish/manage',
-          key: '3',
-          icon: 'el-icon-document'
-
-        },
-        {
-          title: '订单管理',
-          url: '/home/order/manage',
-          key: '4',
-          icon: 'el-icon-setting'
-        },
-        {
-          title: '审核中心',
-          url: '/home/audit/manage',
-          key: '5',
-          icon: 'el-icon-setting'
-
-        }
-      ],
+      menuList: [],
       userInfo: {},
-      currentActive: '1',
+      // currentActive: '2',
 
     }
   },
   mounted () {
+
+    // const pathName = window.location.hash.split('#')[1]
+    // if (pathName === '/home/my/publish') {
+    //   this.currentActive = '1'
+    // }
+    // if (pathName === '/home/publish/manage') {
+    //   this.currentActive = '2'
+    // }
+    // if (pathName === '/home/order/manage') {
+    //   this.currentActive = '3'
+    // }
+    // if (pathName === '/home/audit/manage') {
+    //   this.currentActive = '4'
+    // }
+    // if (pathName === '/home/publish/manage') {
+    //   this.currentActive = '5'
+    // }
+    // console.log(this.currentActive)
     this.getUser()
   },
 
@@ -111,6 +91,51 @@ export default {
       getUserInfoAPI().then(res => {
         if (res.description === 'success') {
           this.userInfo = res.data
+          if (this.userInfo.role === 3) {
+            this.menuList = [
+              {
+                title: '我的发布',
+                url: '/home/my/publish',
+                key: '1',
+                icon: 'el-icon-menu'
+
+              },
+              {
+                title: '发布中心',
+                url: '/home/publish/manage',
+                key: '2',
+                icon: 'el-icon-eleme'
+
+              },
+              {
+                title: '订单管理',
+                url: '/home/order/manage',
+                key: '3',
+                icon: 'el-icon-setting'
+              }
+
+            ]
+            window.location.hash = '/home/my/publish'
+
+          } else {
+            this.menuList = [
+              {
+                title: '审核中心',
+                url: '/home/audit/manage',
+                key: '4',
+                icon: 'el-icon-setting'
+
+              },
+              {
+                title: '投诉管理',
+                url: '/home/publish/manage',
+                key: '5',
+                icon: 'el-icon-document'
+
+              },
+            ]
+            window.location.hash = '/home/audit/manage'
+          }
         }
       })
     },
@@ -200,3 +225,4 @@ a {
   border-right: none;
 }
 </style>
+
