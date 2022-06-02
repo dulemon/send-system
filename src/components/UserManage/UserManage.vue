@@ -226,7 +226,9 @@ export default {
             this.addLoading = false
             if (res.description === 'success') {
               Message.success({ message: '创建成功！' })
-              handleAddVisable(false)
+              this.handleAddVisable(false)
+              this.queryData.pageNum = 1
+              this.getUserList()
 
             } else {
               Message.error({ message: `创建失败,${res.description}！` })
