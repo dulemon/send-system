@@ -48,7 +48,7 @@
                           :content="scope.row.auditRemark"
                           placement="top-start"
                           v-if="scope.row.auditStatus === 3">
-                <span>审核不通过</span>
+                <span style="color:red">审核不通过</span>
               </el-tooltip>
               <span v-else>{{scope.row.auditStatus === 1 ? '待审核':(scope.row.auditStatus === 2 ?  '审核通过' : '')}}</span>
             </template>

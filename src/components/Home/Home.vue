@@ -100,7 +100,24 @@ export default {
               }
 
             ]
-          } else {
+          } else if (this.userInfo.role === 2) {
+            newMenu = [
+              {
+                title: '审核中心',
+                url: '/home/audit/manage',
+                key: '1',
+                icon: 'el-icon-setting'
+
+              },
+              {
+                title: '投诉管理',
+                url: '/home/audit/manage',
+                key: '2',
+                icon: 'el-icon-document'
+
+              },
+            ]
+          } else if (this.userInfo.role === 1) {
             newMenu = [
               {
                 title: '审核中心',
@@ -116,7 +133,14 @@ export default {
                 icon: 'el-icon-document'
 
               },
+              {
+                title: '用户管理',
+                url: '/home/user/manage',
+                key: '3',
+                icon: 'el-icon-document'
+              }
             ]
+
           }
           this.menuList = newMenu
           this.getCurrentMenu(newMenu)

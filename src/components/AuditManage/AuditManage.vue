@@ -195,7 +195,7 @@ export default {
           value: 2
         },
         {
-          label: '待审不通过',
+          label: '审核不通过',
           value: 3
         }
       ]
@@ -305,18 +305,13 @@ export default {
       })
     },
     tableRowClassName ({ rowIndex }) {
-      if (rowIndex === 1) {
+      if (rowIndex % 2 === 0) {
         return 'warning-row'
-      } else if (rowIndex === 3) {
+      } else {
         return 'success-row'
       }
-      return ''
     }
-
-
   }
-
-
 }
 </script>
 

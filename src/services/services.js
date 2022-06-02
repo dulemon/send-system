@@ -99,3 +99,13 @@ export const auditAPI = data => {
 export const complaintAPI = data => {
   return put("/order/complaint", data);
 };
+
+// 用户列表
+export const userListAPI = data => {
+  return get("/user/queryAll", data);
+};
+
+// 解封账号
+export const freezeUserAPI = data => {
+  return put("/user/updateStatus", data);
+};

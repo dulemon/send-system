@@ -4,7 +4,7 @@
              v-model="orderType"
              @tab-click="handleClick">
       <el-tab-pane name="1">
-        <span slot="label"><i class="el-icon-date"></i> 我的发布</span>
+        <span slot="label"><i class="el-icon-date"></i> 我发布的</span>
         <div class="order-wrap"
              v-loading="loading">
           <div class="order-content"

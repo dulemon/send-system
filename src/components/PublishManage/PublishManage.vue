@@ -217,6 +217,7 @@ export default {
           this.loading = false
         }
       })
+      console.log(this.total)
     },
 
     //获取发布详情
