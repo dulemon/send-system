@@ -28,16 +28,16 @@
     </div>
     <div class="wrap">
       <div class="left">
-        <el-menu :default-active="$route.path"
+        <el-menu :default-active="defaultMenu"
                  class="el-menu-vertical-demo">
 
-          <el-menu-item :index="$route.path"
+          <el-menu-item :index="item.key"
                         v-for="item in menuList"
-                        :key="item.key">
-            <router-link :to="item.url">
-              <i :class="item.icon"></i>
-              <span>{{item.title}}</span>
-            </router-link>
+                        :key="item.key"
+                        @click="changeRoute(item.url)">
+
+            <i :class="item.icon"></i>
+            <span>{{item.title}}</span>
           </el-menu-item>
         </el-menu>
       </div>
@@ -57,33 +57,17 @@ import { getUserInfoAPI } from '@/services/services'
 
 export default {
   data () {
+    let path = window.location.hash
     return {
       menuList: [],
       userInfo: {},
-      // currentActive: '2',
-
+      path,
+      defaultMenu: '1',
     }
   },
   mounted () {
-
-    // const pathName = window.location.hash.split('#')[1]
-    // if (pathName === '/home/my/publish') {
-    //   this.currentActive = '1'
-    // }
-    // if (pathName === '/home/publish/manage') {
-    //   this.currentActive = '2'
-    // }
-    // if (pathName === '/home/order/manage') {
-    //   this.currentActive = '3'
-    // }
-    // if (pathName === '/home/audit/manage') {
-    //   this.currentActive = '4'
-    // }
-    // if (pathName === '/home/publish/manage') {
-    //   this.currentActive = '5'
-    // }
-    // console.log(this.currentActive)
     this.getUser()
+
   },
 
   methods: {
@@ -91,8 +75,9 @@ export default {
       getUserInfoAPI().then(res => {
         if (res.description === 'success') {
           this.userInfo = res.data
+          let newMenu = []
           if (this.userInfo.role === 3) {
-            this.menuList = [
+            newMenu = [
               {
                 title: '我的发布',
                 url: '/home/my/publish',
@@ -115,31 +100,42 @@ export default {
               }
 
             ]
-            window.location.hash = '/home/my/publish'
-
           } else {
-            this.menuList = [
+            newMenu = [
               {
                 title: '审核中心',
                 url: '/home/audit/manage',
-                key: '4',
+                key: '1',
                 icon: 'el-icon-setting'
 
               },
               {
                 title: '投诉管理',
                 url: '/home/publish/manage',
-                key: '5',
+                key: '2',
                 icon: 'el-icon-document'
 
               },
             ]
-            window.location.hash = '/home/audit/manage'
           }
+          this.menuList = newMenu
+          this.getCurrentMenu(newMenu)
+
         }
       })
     },
-
+    changeRoute (path) {
+      this.path = path
+      this.$router.push({ path })
+    },
+    // 刷新页面 菜单选中不会改变
+    getCurrentMenu (newMenu) {
+      newMenu.map((item) => {
+        if (`#${item.url}` === window.location.hash) {
+          this.defaultMenu = item.key
+        }
+      })
+    }
   }
 
 

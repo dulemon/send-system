@@ -66,7 +66,14 @@ export default {
         if (valid) {
           loginAPI(this.loginData).then((res) => {
             if (res.description === 'success') {
-              this.$router.push('/home')
+              console.log(res.data)
+
+              if (res.data[0].role === 3) {
+                this.$router.push('/home/my/publish')
+              } else {
+                this.$router.push('/home/audit/manage')
+              }
+
               sessionStorage.setItem('userInfo', JSON.stringify(res.data[0]))
             } else {
               Message.error({ message: `${res.description}！` })
