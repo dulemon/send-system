@@ -318,8 +318,10 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped >
 .audit-manage {
-  width: 100%;
-  height: 100%;
+  width: calc(100% - 30px);
+  height: calc(100% - 30px);
+  background: #fff;
+  padding: 15px;
 }
 .audit-manage-options {
   padding-bottom: 15px;

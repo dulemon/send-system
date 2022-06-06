@@ -109,3 +109,14 @@ export const userListAPI = data => {
 export const freezeUserAPI = data => {
   return put("/user/updateStatus", data);
 };
+
+// 重置密码
+export const resetPasswordAPI = data => {
+  return put("/user/resetPsw", data);
+};
+
+auditComplaintAPI;
+// 审核投诉
+export const auditComplaintAPI = data => {
+  return put("/audit/complaint", data);
+};

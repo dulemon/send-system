@@ -50,7 +50,7 @@
           <el-table-column fixed="right"
                            label="操作">
             <template slot-scope="scope">
-              <el-popconfirm title="确定将此账号的密码重置为*****吗？"
+              <el-popconfirm title="确定将此账号的密码重置为手机号后8位吗？"
                              @confirm="resetPassword(scope.row.id)">
                 <el-button type="text"
                            slot="reference"
@@ -134,7 +134,7 @@
 <script>
 // import { publishCenterAPI, publishDetailAPI, orderCreateAPI } from '@/services/services'
 import moment from 'moment'
-import { registerAPI, userListAPI, freezeUserAPI } from '@/services/services'
+import { registerAPI, userListAPI, freezeUserAPI, resetPasswordAPI } from '@/services/services'
 import { Message } from 'element-ui'
 
 export default {
@@ -278,6 +278,16 @@ export default {
       }
     },
     resetPassword (id) {
+      resetPasswordAPI({ userId: id }).then((res) => {
+        if (res.description === 'success') {
+          Message.success({ message: '操作成功！' })
+          this.queryData.pageNum = 1
+          this.getUserList()
+
+        } else {
+          Message.error({ message: `操作失败,${res.description}！` })
+        }
+      })
 
     },
     freezeAccount (id, type) {

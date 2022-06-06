@@ -1,18 +1,5 @@
 <template>
   <div class="complaint-manage">
-    <div class="complaint-manage-options">
-      <span>投诉状态： </span>
-      <el-select v-model="complaintStatus"
-                 placeholder="请选择"
-                 clearable
-                 @change="selectChange">
-        <el-option v-for="item in complaintStatusOptions"
-                   :key="item.value"
-                   :label="item.label"
-                   :value="item.value">
-        </el-option>
-      </el-select>
-    </div>
     <div class="wrap"
          v-loading="tableLoading">
       <div class="table">
@@ -48,23 +35,20 @@
             </template>
           </el-table-column>
           <el-table-column prop="complaintStatus"
-                           label="投诉状态">
+                           label="投诉状态"
+                           width="300">
             <template slot-scope="scope">
-              <el-tooltip class="item"
-                          effect="dark"
-                          :content="scope.row.auditRemark"
-                          placement="top-start"
-                          v-if="scope.row.complaintStatus === 4">
-                <span>投诉不通过</span>
-              </el-tooltip>
-              <span v-else>{{scope.row.complaintStatus === 2 ? '待审核':(scope.row.complaintStatus === 3 ?  '投诉通过' : '')}}</span>
+              <span v-if="scope.row.complaintStatus === 2">待审核 <p style=" color: red">投诉原因：{{scope.row.complaintRemark}}</p></span>
+              <span v-else-if="scope.row.complaintStatus === 3">投诉通过</span>
+              <span v-else-if="scope.row.complaintStatus === 4">投诉不通过</span>
+              <span v-else></span>
             </template>
           </el-table-column>
           <el-table-column fixed="right"
                            label="操作">
             <template slot-scope="scope"
-                      v-if="scope.row.complaintStatus === 1">
-              <el-button @click="getPublishDetail(scope.row.id)"
+                      v-if="scope.row.complaintStatus === 2">
+              <el-button @click="getPublishDetail(scope.row.publishInfoId,scope.row.complaintRemark,scope.row.orderId)"
                          type="text"
                          size="small">审核</el-button>
 
@@ -121,42 +105,17 @@
       <div class="detail-footer">
         <el-button type="primary"
                    :loading="auditPassLoading"
-                   @click="audit(2,detailData.id)">通过</el-button>
+                   @click="audit(3)">通过</el-button>
         <el-button type="danger"
-                   @click="audit(3,detailData.id)">不通过</el-button>
+                   @click="audit(4)">不通过</el-button>
       </div>
-      <el-dialog width="40%"
-                 title="审核不通过"
-                 :visible.sync="auditFailedVisible"
-                 append-to-body>
-        <el-form :model="form"
-                 :rules="rules"
-                 ref="form"
-                 label-width="60px"
-                 class="demo-ruleForm">
-          <el-form-item label="备注"
-                        prop="auditRemark">
-            <el-input v-model="form.auditRemark"
-                      type="textarea"
-                      :rows="4"></el-input>
-          </el-form-item>
-          <div class="audit-footer">
-            <el-button type="primary"
-                       @click="auditFiled"
-                       :loading="auditFailedLoading"> 确定</el-button>
-            <el-button type="default"
-                       @click="auditFailedVisible = false"> 取消</el-button>
-          </div>
-        </el-form>
-      </el-dialog>
-
     </el-dialog>
 
   </div>
 </template>
 <script>
 
-import { publishCenterAPI, auditAPI, publishDetailAPI } from '@/services/services'
+import { orderListAPI, auditComplaintAPI, publishDetailAPI } from '@/services/services'
 import moment from 'moment'
 import { Message } from 'element-ui'
 
@@ -219,16 +178,15 @@ export default {
     },
     getPublishList () {
       this.tableLoading = true
-      const { pageNum, pageSize, complaintStatus } = this
+      const { pageNum, pageSize } = this
       let params = {
         pageNum,
         pageSize,
-        complaintStatus,
       }
-      publishCenterAPI(params).then(res => {
+      orderListAPI(params).then(res => {
         this.tableLoading = false
         if (res.description === 'success') {
-          this.publishList = res.data.list
+          this.publishList = res.data.list.filter((item) => item.complaintStatus !== 1)
           this.total = res.data.total
 
         }
@@ -240,13 +198,13 @@ export default {
       this.getPublishList()
     },
     // 获取发布详情
-    getPublishDetail (id) {
+    getPublishDetail (id, remark, orderId) {
       this.detailVisable = true
       this.detailLoading = true
       publishDetailAPI({ publishInfoId: id }).then((res) => {
         this.detailLoading = false
         if (res.description === 'success') {
-          this.detailData = { ...res.data, createTime: moment(res.data.createTime).format('YYYY-MM-DD hh:mm:ss') }
+          this.detailData = { ...res.data, createTime: moment(res.data.createTime).format('YYYY-MM-DD hh:mm:ss'), complaintRemark: remark, orderId }
 
           if (res.data.creditLevel < 60) {
             this.detailData.creditLevel = '较差'
@@ -266,44 +224,27 @@ export default {
         }
       })
     },
-    // 审核
-    audit (complaintStatus, publishInfoId) {
-      if (complaintStatus === 2) { //审核通过
-        this.auditPassLoading = true
-        auditAPI({ publishInfoId, complaintStatus }).then(res => {
-          this.auditPassLoading = false
-          if (res.description === 'success') {
-            Message.success({ message: '操作成功' })
-            this.getPublishList()
-            this.detailVisable = false
-          } else {
-            Message.error({ message: res.description })
-          }
+    // 审核com
+    audit (complaintStatus) {
 
-        })
+      this.auditPassLoading = true
+      console.log(this.detailData)
+      auditComplaintAPI({ orderId: this.detailData.orderId, complaintStatus }).then(res => {
+        this.auditPassLoading = false
+        if (res.description === 'success') {
+          Message.success({ message: '操作成功' })
+          this.getPublishList()
+          this.detailVisable = false
+        } else {
+          Message.error({ message: res.description })
+        }
 
-      } else {
-        this.auditFailedVisible = true
-        this.currentPublishId = publishInfoId
-      }
-    },
-    auditFiled () {
-      this.auditFailedLoading = true
-      this.$refs.form.validate((valid) => {
-        auditAPI({ publishInfoId: this.currentPublishId, complaintStatus: 3, auditRemark: this.form.auditRemark }).then(res => {
-          this.auditFailedLoading = false
-          if (res.description === 'success') {
-            this.auditFailedVisible = false
-            this.detailVisable = false
-            Message.success({ message: '操作成功！' })
-            this.getPublishList()
-          } else {
-            Message.error({ message: res.description })
-          }
-
-        })
       })
+
+
+
     },
+
     tableRowClassName ({ rowIndex }) {
       if (rowIndex === 1) {
         return 'warning-row'
@@ -323,8 +264,10 @@ export default {
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped >
 .complaint-manage {
-  width: 100%;
-  height: 100%;
+  width: calc(100% - 30px);
+  height: calc(100% - 30px);
+  padding: 15px;
+  background: #fff;
 }
 .complaint-manage-options {
   padding-bottom: 15px;

@@ -111,7 +111,7 @@ export default {
               },
               {
                 title: '投诉管理',
-                url: '',
+                url: '/home/complaint/manage',
                 key: '2',
                 icon: 'el-icon-document'
 
@@ -128,7 +128,7 @@ export default {
               },
               {
                 title: '投诉管理',
-                url: '',
+                url: '/home/complaint/manage',
                 key: '2',
                 icon: 'el-icon-document'
 

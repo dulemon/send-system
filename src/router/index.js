@@ -9,6 +9,7 @@ import PublishManage from "@/components/PublishManage/PublishManage";
 import AuditManage from "@/components/AuditManage/AuditManage";
 import OrderManage from "@/components/OrderManage/OrderManage";
 import UserManage from "@/components/UserManage/UserManage";
+import ComplaintManage from "@/components/ComplaintManage/ComplaintManage";
 
 Vue.use(Router);
 
@@ -56,6 +57,10 @@ export default new Router({
         {
           path: "/home/user/manage",
           component: UserManage
+        },
+        {
+          path: "/home/complaint/manage",
+          component: ComplaintManage
         }
       ]
     }
