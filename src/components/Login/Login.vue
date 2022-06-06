@@ -4,7 +4,7 @@
     <div class="wrap">
 
       <div class="form">
-        <div class="title">基于SSM的网上接单系统</div>
+        <div class="title">网上接单系统</div>
         <div class="content">
           <el-form :model="loginData"
                    ref="loginData"

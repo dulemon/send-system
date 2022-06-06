@@ -1,7 +1,7 @@
 <template>
   <div class="home">
     <div class="top">
-      <div class="left">基于SSM的网上接单系统</div>
+      <div class="left">网上接单系统</div>
       <div class="right">
         <div class=right-item>
           <el-avatar size="small"
