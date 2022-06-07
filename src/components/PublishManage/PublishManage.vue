@@ -292,7 +292,6 @@ export default {
   /* background: #fff; */
   padding: 10px;
   height: calc(100% - 90px);
-  overflow-y: auto;
 }
 .publish-manage-content {
   display: flex;
@@ -300,11 +299,11 @@ export default {
 }
 
 .publish-manage-content-item {
-  width: calc((100% - 90px) / 5);
+  width: calc(25% - 22px);
   margin-right: 20px;
   margin-bottom: 20px;
 }
-.publish-manage-content-item:nth-of-type(5n) {
+.publish-manage-content-item:nth-of-type(4n) {
   margin-right: 0;
 }
 .publish-manage-content-item .image {
