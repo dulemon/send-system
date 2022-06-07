@@ -4,7 +4,7 @@
              v-model="orderType"
              @tab-click="handleClick">
       <el-tab-pane name="1">
-        <span slot="label"><i class="el-icon-date"></i> 我发布的</span>
+        <span slot="label"><i class="el-icon-date"></i> 我卖出的</span>
         <div class="order-wrap"
              v-loading="loading">
           <div class="order-content"
@@ -36,8 +36,8 @@
                 <div class="order-content-item-second-right">
                   <div style="text-align:right">
                     <span v-if="item.orderStatus === 1">处理中</span>
-                    <span v-else-if="item.orderStatus === 2">接单人已提交</span>
-                    <span v-else-if="item.orderStatus === 3">交易已完成</span>
+                    <span v-else-if="item.orderStatus === 2">卖家已发货</span>
+                    <span v-else-if="item.orderStatus === 3">买家已确认(交易已完成)</span>
                     <span v-else>交易已取消</span>
                   </div>
                   <div style="text-align:right">
@@ -67,9 +67,9 @@
         </div>
 
       </el-tab-pane>
-      <el-tab-pane label="我已接单"
+      <el-tab-pane label="我买到的"
                    name="2">
-        <span slot="label"><i class=" el-icon-reading"></i> 我已接单</span>
+        <span slot="label"><i class=" el-icon-reading"></i> 我买到的</span>
         <div class="order-wrap"
              v-loading="loading">
           <div class="order-content"
