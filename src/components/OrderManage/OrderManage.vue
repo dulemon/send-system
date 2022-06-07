@@ -40,13 +40,13 @@
                     <span v-else-if="item.orderStatus === 3">买家已确认(交易已完成)</span>
                     <span v-else>交易已取消</span>
                   </div>
-                  <div style="text-align:right">
+                  <!-- <div style="text-align:right">
                     <el-button size="mini"
                                type="primary"
                                v-if="item.orderStatus === 2"
                                :loading="updateLoading && currentOrderId === item.orderId"
                                @click="updateStatus(item.orderId,3)">确认收货</el-button>
-                  </div>
+                  </div> -->
                 </div>
               </div>
             </div>
@@ -110,18 +110,19 @@
 
                   </div>
 
-                  <div v-if="item.orderStatus === 1"
-                       style="text-align:right">
+                  <div style="text-align:right">
                     <el-button size="mini"
                                type="primary"
                                :loading="updateLoading && currentOrderId === item.orderId "
-                               @click="updateStatus(item.orderId, 2)">已完成</el-button>
+                               v-if="item.orderStatus === 2"
+                               @click="updateStatus(item.orderId, 3)">确认收货</el-button>
                     <el-button size="mini"
                                type="primary"
                                :loading="cancelLoading && currentOrderId === item.orderId"
+                               v-if="item.orderStatus === 2 ||item.orderStatus === 1 "
                                @click="updateStatus(item.orderId, 4)">取消订单</el-button>
                   </div>
-                  <div v-else-if="item.orderStatus === 3 && item.complaintStatus === 1"
+                  <div v-if="item.complaintStatus === 1"
                        style="text-align:right">
                     <el-button size="mini"
                                type="primary"
