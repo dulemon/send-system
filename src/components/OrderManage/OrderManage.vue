@@ -35,18 +35,19 @@
                 </div>
                 <div class="order-content-item-second-right">
                   <div style="text-align:right">
-
-                    <span v-if="item.orderStatus === 2">卖家已发货</span>
-                    <span v-else-if="item.orderStatus === 3">买家已确认(交易已完成)</span>
-                    <span v-else>交易已取消</span>
-                  </div>
-                  <div style="text-align:right">
                     <el-button size="mini"
                                type="primary"
                                v-if="item.orderStatus === 1"
                                :loading="updateLoading && currentOrderId === item.orderId"
                                @click="updateStatus(item.orderId,2)">确认发货</el-button>
+
+                    <span v-else-if="item.orderStatus === 2">已发货</span>
+                    <span v-else-if="item.orderStatus === 3 && item.complaintStatus === 3">该订单已被投诉，信誉积分－5</span>
+                    <span v-else-if="item.orderStatus === 3 ">买家已确认(交易已完成)</span>
+                    <span v-else>交易已取消</span>
+
                   </div>
+
                 </div>
               </div>
             </div>
@@ -100,8 +101,8 @@
                 </div>
                 <div class="order-content-item-second-right">
                   <div style="text-align:right">
-                    <span v-if="item.orderStatus === 1">处理中</span>
-                    <span v-else-if="item.orderStatus === 2">已提交</span>
+                    <span v-if="item.orderStatus === 1">等待卖家发货</span>
+                    <span v-else-if="item.orderStatus === 2">卖家已发货</span>
                     <span v-else-if="item.orderStatus === 3 && item.complaintStatus === 1">交易已完成</span>
                     <span v-else-if="item.orderStatus === 3 && item.complaintStatus === 2">已投诉,待审核</span>
                     <span v-else-if="item.orderStatus === 3 && item.complaintStatus === 3">投诉通过</span>
@@ -119,10 +120,10 @@
                     <el-button size="mini"
                                type="primary"
                                :loading="cancelLoading && currentOrderId === item.orderId"
-                               v-if="item.orderStatus === 2 ||item.orderStatus === 1 "
+                               v-if="item.orderStatus === 1 "
                                @click="updateStatus(item.orderId, 4)">取消订单</el-button>
                   </div>
-                  <div v-if="item.complaintStatus === 1"
+                  <div v-if="item.complaintStatus === 1 && item.orderStatus === 3"
                        style="text-align:right">
                     <el-button size="mini"
                                type="primary"

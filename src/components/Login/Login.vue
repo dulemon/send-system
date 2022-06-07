@@ -4,7 +4,7 @@
     <div class="wrap">
 
       <div class="form">
-        <div class="title">二手交易平台系统</div>
+        <div class="title">二手交易平台</div>
         <div class="content">
           <el-form :model="loginData"
                    ref="loginData"
