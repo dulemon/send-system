@@ -35,7 +35,7 @@
       </div>
       <div class="publish-manage-options-line">
         <div class="publish-manage-options-item">
-          <span class="label">赏金区间：</span>
+          <span class="label">价格区间：</span>
           <div style="display: flex;align-items:center">
             <el-input v-model="minReward"
                       style="width:100px"
@@ -80,11 +80,11 @@
               <el-button type="text"
                          class="button"
                          @click="getPublishDetail(item.id)">详情</el-button>
-              <el-popconfirm title="确定接单吗？"
+              <el-popconfirm title="确定下单吗？"
                              @confirm="orderCreate(item.id)">
                 <el-button type="text"
                            class="button"
-                           slot="reference">接单</el-button>
+                           slot="reference">下单</el-button>
               </el-popconfirm>
             </div>
 
@@ -267,7 +267,7 @@ export default {
       orderCreateAPI({ publishInfoId: id }).then(res => {
         if (res.description === 'success') {
           this.pageNum = 1
-          Message.success({ message: '接单成功！' })
+          Message.success({ message: '下单成功！' })
           this.getPublishList()
         } else {
           Message.error({ message: res.description })

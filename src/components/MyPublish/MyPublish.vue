@@ -33,7 +33,7 @@
 
           </el-table-column>
           <el-table-column prop="reward"
-                           label="赏金">
+                           label="价格">
             <template slot-scope="scope">
               <span>{{ scope.row.reward}}元</span>
 
@@ -111,11 +111,11 @@
                     v-model="addData.description"
                     placeholder="请输入描述信息"></el-input>
         </el-form-item>
-        <el-form-item label="赏金"
+        <el-form-item label="价格"
                       prop="reward"
                       width="300px">
           <el-input v-model="addData.reward"
-                    placeholder="请输入赏金"></el-input>
+                    placeholder="请输入价格"></el-input>
         </el-form-item>
         <el-form-item label="上传图片"
                       prop="fileList">
@@ -228,7 +228,7 @@ export default {
           { required: true, message: '请输入描述', trigger: 'blur' }
         ],
         reward: [
-          { required: true, message: '请输入赏金', trigger: 'blur' },
+          { required: true, message: '请输入价格', trigger: 'blur' },
           { validator: validateReward, trigger: 'blur' }
         ]
       },

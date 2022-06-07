@@ -41,7 +41,7 @@
 
           </el-table-column>
           <el-table-column prop="reward"
-                           label="赏金">
+                           label="价格">
             <template slot-scope="scope">
               <span>{{ scope.row.reward}}元</span>
 
