@@ -34,32 +34,32 @@ module.exports = {
     cssSourceMap: true,
     proxyTable: {
       "/user": {
-        target: "http://eic6j7.natappfree.cc", //请求域名
+        target: "http://localhost:8080", //请求域名
         //secure: false, // 如果是https接口，需要配置这个参数
         changeOrigin: true //如果是跨域访问，需要配置这个参数
       },
       "/publish": {
-        target: "http://eic6j7.natappfree.cc", //请求域名
+        target: "http://localhost:8080", //请求域名
         //secure: false, // 如果是https接口，需要配置这个参数
         changeOrigin: true //如果是跨域访问，需要配置这个参数
       },
       "/wallet": {
-        target: "http://eic6j7.natappfree.cc", //请求域名
+        target: "http://localhost:8080", //请求域名
         //secure: false, // 如果是https接口，需要配置这个参数
         changeOrigin: true //如果是跨域访问，需要配置这个参数
       },
       "/receiver": {
-        target: "http://eic6j7.natappfree.cc", //请求域名
+        target: "http://localhost:8080", //请求域名
         //secure: false, // 如果是https接口，需要配置这个参数
         changeOrigin: true //如果是跨域访问，需要配置这个参数
       },
       "/order": {
-        target: "http://eic6j7.natappfree.cc", //请求域名
+        target: "http://localhost:8080", //请求域名
         //secure: false, // 如果是https接口，需要配置这个参数
         changeOrigin: true //如果是跨域访问，需要配置这个参数
       },
       "/audit": {
-        target: "http://eic6j7.natappfree.cc", //请求域名
+        target: "http://localhost:8080", //请求域名
         //secure: false, // 如果是https接口，需要配置这个参数
         changeOrigin: true //如果是跨域访问，需要配置这个参数
       }
