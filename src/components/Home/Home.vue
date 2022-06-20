@@ -29,9 +29,12 @@
     <div class="wrap">
       <div class="left">
         <el-menu :default-active="defaultMenu"
-                 class="el-menu-vertical-demo">
-
-          <el-menu-item :index="item.key"
+                 :class="userInfo.role === 1 ? 'el-menu-vertical-admin' : '' "
+                 :background-color="userInfo.role === 1 ? '#545c64' : '' "
+                 :text-color="userInfo.role === 1 ? '#fff' : '' "
+                 :active-text-color="userInfo.role === 1 ? '#ffd04b' : ''">
+          <el-menu-item :index="
+                 item.key"
                         v-for="item in menuList"
                         :key="item.key"
                         @click="changeRoute(item.url)">
@@ -67,6 +70,7 @@ export default {
   },
   mounted () {
     this.getUser()
+
 
   },
 
@@ -144,6 +148,7 @@ export default {
           }
           this.menuList = newMenu
           this.getCurrentMenu(newMenu)
+          console.log(this.userInfo.role)
 
         }
       })
@@ -179,11 +184,12 @@ export default {
 }
 .wrap .left {
   width: 220px;
-  height: calc(100% - 15px);
   overflow-y: auto;
   background: #fff;
-  box-shadow: 2px 0 6px rgb(0 21 41 / 35%);
+}
+.wrap .left .el-menu {
   padding-top: 15px;
+  height: 100%;
 }
 .wrap .right {
   width: calc(100% - 220px);
@@ -194,7 +200,7 @@ export default {
 }
 .top {
   height: 60px;
-  background: #001529;
+  background: #545c64;
   color: #fff;
   display: flex;
   justify-content: space-between;
